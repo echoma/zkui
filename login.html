@@ -12,7 +12,7 @@ $(document).ready(
 	function()
 	{
 		//setTimeout("window.location.reload()", 2000);
-		$("#host").focus();
+		$("#host").focus().select();
 		$('#login_btn').click(function(){
 			var host = $('#host').val();
 			setCookie('zkhost', host, 864000);

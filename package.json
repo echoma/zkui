@@ -4,10 +4,10 @@
 	"description":"GUI for ZooKeeper",
 	"window":{
 		"title":"zkui",
-		"toolbar":true,
-		"width":800,
+		"toolbar":false,
+		"width":930,
 		"height":600,
-		"min_width":800,
+		"min_width":930,
 		"min_height":600
 	},
 	"webkit":{
