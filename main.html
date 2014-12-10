@@ -8,7 +8,7 @@
 html,body { margin:0px; overflow:hidden; height:100%; }
 .pathbread {margin-bottom:0px;}
 .mainbottom {display:flex;flex-direction:row;flex:1; border-top:0.2em solid gray;}
-.mainbottomlft {flex:1;padding:0.2em;display:flex;flex-direction:column;}
+.mainbottomlft {flex:1;padding:0.2em;display:flex;flex-direction:column;padding:0.5em;}
 .mainbottomdvd {width:0.125em; background-color:gray; margin-left:0.2em; margin-right:0.2em;}
 .mainbottomrgt {flex:3;display:flex;flex-direction:column;padding:0.2em;}
 .childbox {flex:1;display:flex;flex-direction:row;flex-wrap:wrap;align-items:flex-start;align-content:flex-start;}
@@ -32,12 +32,15 @@ html,body { margin:0px; overflow:hidden; height:100%; }
 </ol>
 <div class="mainbottom">
 	<div class="mainbottomlft">
+		<div class="btn-group" role="group" aria-label="...">
+			<button type="button" class="btn btn-warning" onClick="showCreateChildDialog()">Create Child</button>
+			<button type="button" class="btn btn-info" onClick="showCopyChildrenDialog()" title="Copy all children to another node (but will not copy children's children)">Copy Children</button>
+		</div>
 		<h4 id="chld_list" class="childbox">
 			<a class="label label-primary child hidden" name="sample">Default</a>
 		</h4>
-		<div class="btn-group" role="group" aria-label="...">
-			<button type="button" class="btn btn-warning" onClick="showCreateChildDialog()">Create Child</button>
-			<button type="button" class="btn btn-info" onClick="showCopyChildrenDialog()" title="Copy children to another node (but will not copy children's children)">Copy Children</button>
+		<div class="btn-group" role="group" aria-label="..." style="margin-top:2.2em">
+			<button type="button" class="btn btn-danger" onClick="showDelChildrenDialog()" title="Delete all children (make sure all children has no children)">Delete All Children</button>
 		</div>
 	</div>
 	<div class="mainbottomdvd"></div>
@@ -196,11 +199,11 @@ html,body { margin:0px; overflow:hidden; height:100%; }
 			<div class="modal-body">
 				<form role="form">
 					<div class="form-group">
-						<label for="copy_children_dlg_name" class="control-label">PATH:</label>
+						<label for="copy_children_dlg_path" class="control-label">PATH:</label>
 						<input type="text" class="form-control" id="copy_children_dlg_path" readonly="1"/>
 					</div>
 					<div class="form-group">
-						<label for="copy_children_dlg_name" class="control-label">COPY TO PATH:</label>
+						<label for="copy_children_dlg_new_path" class="control-label">COPY TO PATH:</label>
 						<input type="text" class="form-control" id="copy_children_dlg_new_path"/>
 					</div>
 					<!--<div class="progress hidden">
@@ -213,6 +216,32 @@ html,body { margin:0px; overflow:hidden; height:100%; }
 				<div>
 					<button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
 					<button type="button" class="btn btn-danger" onClick="ensureCopyChildren()">Copy</button>
+				</div>
+			</div>
+		</div>
+	</div>
+</div>
+
+<div class="modal fade" id="del_children_dialog">
+	<div class="modal-dialog">
+		<div class="modal-content">
+			<div class="modal-header">
+				<button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+				<h4 class="modal-title">Delete Children (Make sure that all children have no child)</h4>
+			</div>
+			<div class="modal-body">
+				<form role="form">
+					<div class="form-group">
+						<label for="del_children_dlg_path" class="control-label">PATH:</label>
+						<input type="text" class="form-control" id="del_children_dlg_path" readonly="1"/>
+					</div>
+					<span class="help-block hidden" id="del_children_dlg_tips"></span>
+				</form>
+			</div>
+			<div class="modal-footer">
+				<div>
+					<button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+					<button type="button" class="btn btn-danger" onClick="ensureDelChildren()">Delete Children</button>
 				</div>
 			</div>
 		</div>

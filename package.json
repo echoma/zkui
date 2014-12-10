@@ -2,6 +2,7 @@
 	"name":"zkui",
 	"main":"login.html",
 	"description":"GUI for ZooKeeper",
+	"version":"0.1.0",
 	"window":{
 		"title":"zkui",
 		"toolbar":false,

@@ -268,12 +268,12 @@ function showCopyChildrenDialog()
 	$('#copy_children_dlg_path').val($('#stat_path').val());
 	$('#copy_children_dlg_new_path').val($('#stat_path').val());
 	//$('#copy_children_dlg_prg').parent().addClass('hidden');
-	$('#copy_children_dlg_tips').addClass('hidden')
+	$('#copy_children_dlg_tips').addClass('hidden');
 	setTimeout("$('#copy_children_dlg_new_path').focus().select();",500);
 }
 function ensureCopyChildren()
 {
-	var dlg=$('#dup_node_dialog');
+	var dlg=$('#copy_children_dialog');
 	var path=$('#copy_children_dlg_path').val();
 	var new_path=$('#copy_children_dlg_new_path').val();
 	if(path=='/')
@@ -296,8 +296,6 @@ function ensureCopyChildren()
 		myalert("new_path can not end with /");
 		return;
 	}
-	updateCopyChildrenProg(1.0,"Copy Success");
-	return;
 	updateCopyChildrenProg(0.01,'');
 	var data = new Object();
 	data.path = path;
@@ -310,8 +308,9 @@ function ensureCopyChildren()
 				_gzk.a_get_children(data.path,0,function(rc,err,list){
 					if(0!=rc)
 					{
-						updateCopyChildrenProg(0.01,"get_children("+data.path+") failed, err="+err);
-						callback(err,null);
+						var text = "get_children("+data.path+") failed, err="+err;
+						updateCopyChildrenProg(0.01,text);
+						callback(text,null);
 						return;
 					}
 					list.sort(function(a,b){if(a<b)return -1; else if(a>b) return 1; return 0;});
@@ -325,16 +324,18 @@ function ensureCopyChildren()
 				_gzk.a_get_children(data.new_path,0,function(rc,err,list){
 					if(0!=rc)
 					{
-						updateCopyChildrenProg(0.01,"get_children("+data.new_path+") failed, err="+err);
-						callback(err,null);
+						var text = "get_children("+data.new_path+") failed, err="+err;
+						updateCopyChildrenProg(0.01,text);
+						callback(text,null);
 						return;
 					}
 					for(var i=0; i<data.origin_list.length; ++i)
 					{
 						if(list.indexOf(data.origin_list[i])>=0)//check conflict
 						{
-							updateCopyChildrenProg(0.01,"get_children("+data.new_path+") failed, err="+err);
-							callback(err,null);
+							var text = "get_children("+data.new_path+") failed, err="+err;
+							updateCopyChildrenProg(0.01,text);
+							callback(text,null);
 							return;
 						}
 					}
@@ -355,8 +356,9 @@ function ensureCopyChildren()
 				 	_gzk.a_get(data.path+'/'+item,0,function(rc,err,stat,ndt){
 						if(0!=rc)
 						{
-							updateCopyChildrenProg(prg,"get("+item+") failed, err="+err);
-							cb(err);
+							var text = "get("+item+") failed, err="+err;
+							updateCopyChildrenProg(prg,text);
+							cb(text);
 							return;
 						}
 						prg = (idx+2)/(data.origin_list.length*2)
@@ -364,8 +366,9 @@ function ensureCopyChildren()
 						_gzk.a_create(data.new_path+'/'+item, ndt, 0, function(rc, err, path){
 							if(rc!=0)
 							{
-								updateCopyChildrenProg(prg,"create("+item+") failed, err="+err);
-								cb(err);
+								var text = "create("+item+") failed, err="+err;
+								updateCopyChildrenProg(prg,text);
+								cb(text);
 								return;
 							}
 							cb(null,null);
@@ -378,7 +381,7 @@ function ensureCopyChildren()
 		],
 		function(err,results){
 			if(err)
-				myalert(text);
+				myalert(err);
 			else
 				updateCopyChildrenProg(1.0,"Copy Success");
 	});
@@ -387,6 +390,80 @@ function updateCopyChildrenProg(prog, text)
 {
 	//$('#copy_children_dlg_prg').css('width',parseInt(prog*100)+'%').parent().removeClass('hidden');
 	$('#copy_children_dlg_tips').removeClass('hidden').text(text);
+}
+
+function showDelChildrenDialog()
+{
+	var dlg=$('#del_children_dialog');
+	dlg.modal('show');
+	$('#del_children_dlg_path').val($('#stat_path').val());
+	$('#del_children_dlg_tips').addClass('hidden');
+}
+function ensureDelChildren()
+{
+	var dlg=$('#del_node_dialog');
+	var path=$('#del_children_dlg_path').val();
+	if(path=='/')
+	{
+		myalert("can not del children root");
+		return;
+	}
+	updateDelChildrenProg(0.01,'');
+	var data = new Object();
+	data.path = path;
+	var async = require('async');
+	async.series([
+			function(callback)
+			{
+				//get children of path
+				_gzk.a_get_children(data.path,0,function(rc,err,list){
+					if(0!=rc)
+					{
+						var text = "get_children("+data.path+") failed, err="+err;
+						updateDelChildrenProg(0.01,text);
+						callback(text,null);
+						return;
+					}
+					list.sort(function(a,b){if(a<b)return -1; else if(a>b) return 1; return 0;});
+					data.list=list;
+					callback(null,null);
+				});
+			},
+			function(callback)
+			{
+				//for each child, do delete action
+				 async.eachSeries(data.list, function(item,cb){
+				 	var idx = data.list.indexOf(item);
+				 	var prg = (idx+1)/(data.list.length*2);
+				 	updateDelChildrenProg(prg,"get("+item+")");
+				 	_gzk.a_delete_(data.path+'/'+item, -1, function(rc,err){
+						if(0!=rc)
+						{
+							var text = "delete("+item+") failed, err="+err;
+							updateDelChildrenProg(prg,text);
+							cb(text);
+							return;
+						}
+						prg = (idx+2)/(data.list.length*2)
+						updateDelChildrenProg(prg,"delete("+item+")");
+						cb(null,null);
+					});
+				 }, function(err){
+				 	callback(err,null)
+				 });
+			}
+		],
+		function(err,results){
+			zkuiRefreshPath();
+			if(err)
+				myalert(err);
+			else
+				updateDelChildrenProg(1.0,"Delete All Children Success");
+	});
+}
+function updateDelChildrenProg(prog, text)
+{
+	$('#del_children_dlg_tips').removeClass('hidden').text(text);
 }
 
 function showEditValDialog()
@@ -437,7 +514,7 @@ function ensureDelNode()
 		myalert('can not delete root');
 		return;
 	}
-	if(path=='zookeeper')
+	if(path=='/zookeeper')
 	{
 		myalert('can not delete the zookeeper node');
 		return;
