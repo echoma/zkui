@@ -13,6 +13,8 @@ $(document).ready(
 			var clipboard = gui.Clipboard.get();
 			clipboard.set($('#stat_path').val(), 'text');
 		});
+
+		$('#create_child_dialog').draggable({handle:'#create_child_dialog .modal-header'})
 	}
 );
 function myalert(text)
@@ -212,8 +214,8 @@ function zkuiAclUpdate(acl_list)
 function showCreateChildDialog()
 {
 	var dlg = $('#create_child_dialog');
-	dlg.modal('show');
-	setTimeout("$('#create_child_dlg_name').focus().select();",500);
+	dlg.modal({backdrop:false}).draggable({handle: ".modal-header"});
+	setTimeout("$('#create_child_dlg_name').focus().select();",100);
 	$('#create_child_dlg_data').val('');
 }
 function ensureCreateChild()
@@ -264,12 +266,12 @@ function ensureCreateChild()
 function showCopyChildrenDialog()
 {
 	var dlg=$('#copy_children_dialog');
-	dlg.modal('show');
+	dlg.modal({backdrop:false}).draggable({handle: ".modal-header"});
 	$('#copy_children_dlg_path').val($('#stat_path').val());
 	$('#copy_children_dlg_new_path').val($('#stat_path').val());
 	//$('#copy_children_dlg_prg').parent().addClass('hidden');
 	$('#copy_children_dlg_tips').addClass('hidden');
-	setTimeout("$('#copy_children_dlg_new_path').focus().select();",500);
+	setTimeout("$('#copy_children_dlg_new_path').focus().select();",100);
 }
 function ensureCopyChildren()
 {
@@ -395,7 +397,7 @@ function updateCopyChildrenProg(prog, text)
 function showDelChildrenDialog()
 {
 	var dlg=$('#del_children_dialog');
-	dlg.modal('show');
+	dlg.modal({backdrop:false}).draggable({handle: ".modal-header"});
 	$('#del_children_dlg_path').val($('#stat_path').val());
 	$('#del_children_dlg_tips').addClass('hidden');
 }
@@ -469,11 +471,11 @@ function updateDelChildrenProg(prog, text)
 function showEditValDialog()
 {
 	var dlg=$('#edit_val_dialog');
-	dlg.modal('show');
+	dlg.modal({backdrop:false}).draggable({handle: ".modal-header"});
 	$('#edit_val_dlg_path').val($('#stat_path').val());
 	$('#edit_val_dlg_version').text($('#stat_version').val());
 	$('#edit_val_dlg_data').val($('#node_value').text());
-	setTimeout("$('#edit_val_dlg_data').focus().select();",500);
+	setTimeout("$('#edit_val_dlg_data').focus().select();",100);
 }
 function ensureEditVal()
 {
@@ -500,14 +502,14 @@ function ensureEditVal()
 function showDelNodeDialog()
 {
 	var dlg=$('#del_node_dialog');
-	dlg.modal('show');
+	dlg.modal({backdrop:false}).draggable({handle: ".modal-header"});
 	$('#del_node_dlg_path').val($('#stat_path').val());
 	$('#del_node_dlg_version').text($('#stat_version').val());
 }
 function ensureDelNode()
 {
 	var dlg=$('#del_node_dialog');
-	dlg.modal('show');
+	dlg.modal({backdrop:false}).draggable({handle: ".modal-header"});
 	var path=$('#del_node_dlg_path').val();
 	if(path=='/')
 	{
