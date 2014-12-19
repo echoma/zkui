@@ -2,50 +2,46 @@
 <html>
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
-<!--<script src="http://libs.baidu.com/jquery/2.0.0/jquery.min.js" type="text/javascript"></script>
+<script src="http://libs.baidu.com/jquery/2.0.0/jquery.min.js" type="text/javascript"></script>
 <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.1/css/bootstrap.min.css">
-<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.1/css/bootstrap-theme.min.css">-->
-<script src="js/jquery-2.1.3.min.js" type="text/javascript"></script>
-<link rel="stylesheet" href="bootstrap3.3.1/css/bootstrap.min.css">
-<link rel="stylesheet" href="bootstrap3.3.1/css/bootstrap-theme.min.css">
-<script src="js/util.js"></script>
-<style type="text/css">
-html,body{font-family:"Helvetica Neue","Helvetica","Arial","sans-serif";}
-</style>
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.1/css/bootstrap-theme.min.css"><script src="js/util.js"></script>
 <script type="text/javascript">
-var alert_dom;
 $(document).ready(
 	function()
 	{
-		alert_dom = $('#myalert')
+		//setTimeout("window.location.reload()", 2000);
 		$("#host").focus().select();
 		$('#login_btn').click(function(){
 			var host = $('#host').val();
-			py.jsSetCfg('zkhost', host);
+			setCookie('zkhost', host, 864000);
 			var authtype = $('#auth_type').val()
-			py.jsSetCfg('zkauthtype', authtype);
+			setCookie('zkauthtype', authtype, 864000);
 			var authvalue = $('#auth_value').val()
-			py.jsSetCfg('zkauthval', authvalue);
-			var obj = py.jsZkConnect(host)
-			if(!empty(obj))
-			{
-				myalert("connect() failed: err="+obj)
-				return;
-			}
-			obj = py.jsZkGetChildren('/')
-			if(empty(obj.err))
-			{
-				window.location.href="main.html";
-			}
-			else
-			{
-				myalert("get_children() failed, err="+obj.err)
-			}
+			setCookie('zkauthval', authvalue);
+			var ZooKeeper = require ("zookeeper");
+			var zk = new ZooKeeper({connect:host,timeout:200000,debug_level:ZooKeeper.ZOO_LOG_LEVEL_DEBUG});
+			zk.connect(function(err){
+				if(err)
+				{
+					myalert('ZooKeeper connect failed, err='+err);
+					return;
+				}
+				zk.a_get_children('/',0,function(rc,err,list){
+					if(0!=rc)
+					{
+						myalert("List / after connect failed, err="+err);
+						zk.close();
+						zk = null;
+						return;
+					}
+					window.location.href="main.html";
+				});
+			});
 		});
-		var ohost = py.jsGetCfg('zkhost');
+		var ohost = getCookie('zkhost');
 		if(!empty(ohost))
 			$("#host").val(ohost);
-		var oatype = py.jsGetCfg('zkauthtype');
+		var oatype = getCookie('zkauthtype');
 		if(!empty(oatype))
 			setAuthType(oatype);
 	}
@@ -55,9 +51,9 @@ function setAuthType(type)
 	$('#auth_type').val(type);
 	$('#type_select_btn>span').eq(0).text(type);
 }
-function myalert(t)
+function myalert(text)
 {
-	alert_dom.text(t).show(500);
+	$('#alert').text(text).fadeIn(500);
 }
 </script>
 </head>
@@ -90,7 +86,7 @@ function myalert(t)
 					<button type="button" class="btn btn-primary form-control" id="login_btn">Login</button>
 				</div>
 				<div>
-					<div class="alert alert-warning" role="alert" id="myalert" style="display:none"></div>
+					<div class="alert alert-warning" role="alert" id="alert" style="display:none"></div>
 				</div>
 			</form>
 		</div>
