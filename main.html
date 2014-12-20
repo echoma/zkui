@@ -40,14 +40,14 @@ body{display:-webkit-flex;-webkit-flex-direction:column;}
 <div class="mainbottom">
 	<div class="mainbottomlft">
 		<div class="btn-group" role="group" aria-label="..." style="height:2.3em">
-			<button type="button" class="btn btn-warning" onClick="showCreateChildDialog()">Create Child</button>
-			<button type="button" class="btn btn-info" onClick="showCopyChildrenDialog()" title="Copy all children to another node (but will not copy children's children)">Copy Children</button>
+			<button type="button" class="btn btn-warning" onClick="showCreateChildDialog()"><span class="glyphicon glyphicon-plus" aria-hidden="true"></span><b> Create Child</b></button>
+			<button type="button" class="btn btn-info" onClick="showCopyChildrenDialog()" title="Copy all children to another node (but will not copy children's children)"><span class="glyphicon glyphicon-send" aria-hidden="true"></span><b> Copy Children</b></button>
 		</div>
 		<h4 id="chld_list" class="childbox">
 			<a class="label label-primary child hidden" name="sample">Default</a>
 		</h4>
 		<div class="btn-group" role="group" aria-label="..." style="margin-top:2.2em;height:2.3em">
-			<button type="button" class="btn btn-danger" onClick="showDelChildrenDialog()" title="Delete all children (make sure all children has no children)">Delete All Children</button>
+			<button type="button" class="btn btn-danger" onClick="showDelChildrenDialog()" title="Delete all children (make sure all children has no children)"><span class="glyphicon glyphicon-fire" aria-hidden="true"></span><b> Delete All Children</b></button>
 		</div>
 	</div>
 	<div class="mainbottomdvd"></div>
@@ -63,11 +63,11 @@ body{display:-webkit-flex;-webkit-flex-direction:column;}
 			</div>
 			<div class="input-group">
 				<span class="input-group-addon">CTIME</span>
-				<input type="text" class="form-control" readonly="1" placeholder="Not Got Yet" id="stat_ctime" size="35">
+				<input type="text" class="form-control" readonly="1" placeholder="Not Got Yet" id="stat_ctime" size="20">
 			</div>
 			<div class="input-group">
 				<span class="input-group-addon">MTIME</span>
-				<input type="text" class="form-control" readonly="1" placeholder="Not Got Yet" id="stat_mtime" size="35">
+				<input type="text" class="form-control" readonly="1" placeholder="Not Got Yet" id="stat_mtime" size="20">
 			</div>
 			<div class="input-group hidden" name="acl_sample">
 				<span class="input-group-addon">ACL</span>
@@ -76,8 +76,8 @@ body{display:-webkit-flex;-webkit-flex-direction:column;}
 		</form>
 		<div style="padding-top:0.5em">
 			<div class="btn-group" role="group" aria-label="...">
-				<button type="button" class="btn btn-warning" title="Edit value" onClick="showEditValDialog()">Edit Value</button>
-				<button type="button" class="btn btn-danger" onClick="showDelNodeDialog()">Delete Node</button>
+				<button type="button" class="btn btn-warning" title="Edit value" onClick="showEditValDialog()"><span class="glyphicon glyphicon-edit" aria-hidden="true"></span><b> Edit Value</b></button>
+				<button type="button" class="btn btn-danger" onClick="showDelNodeDialog()"><span class="glyphicon glyphicon-remove" aria-hidden="true"></span><b> Delete Node</b></button>
 			</div>
 		</div>
 		<div class="panel panel-default node_val_pnl" id="node_value"></div>

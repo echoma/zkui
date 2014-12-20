@@ -138,8 +138,8 @@ class WebWindow(object):
 		except ZookeeperError as e:
 			logging.info("jsZkGet, ZookeeperError")
 			return QVariant({"err":str(e)})
-		ctime = time.strftime('(%Z,%z)%Y-%m-%d %H:%M:%S', time.localtime(ret[1].ctime/1000))
-		mtime = time.strftime('(%Z,%z)%Y-%m-%d %H:%M:%S', time.localtime(ret[1].mtime/1000))
+		ctime = time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(ret[1].ctime/1000))
+		mtime = time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(ret[1].mtime/1000))
 		stat = {'ctime':ctime,'mtime':mtime,'version':ret[1].version}
 		return QVariant({"err":"", "data":ret[0].decode('utf8'), "stat":QVariant(stat)})
 	@pyqtSlot(str, str, int, result=str)
