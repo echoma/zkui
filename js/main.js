@@ -264,6 +264,8 @@ function ensureCopyChildren()
 	var dlg=$('#copy_children_dialog');
 	var path=$('#copy_children_dlg_path').val();
 	var new_path=$('#copy_children_dlg_new_path').val();
+	var max_depth = parseInt($('#copy_children_dlg_max_depth').val());
+	var ccheck = $('#copy_children_dlg_children_only:checked').length>0?1:0;
 	if(path=='/')
 	{
 		myalert("can not copy root");
@@ -284,8 +286,13 @@ function ensureCopyChildren()
 		myalert("new_path can not end with /");
 		return;
 	}
+	if(max_depth<1)
+	{
+		myalert("max_depth should be at least 1");
+		return;
+	}
 	updateCopyChildrenProg(0.01,'');
-	err = py.jsZkCopyChildren(new_path, path)
+	err = py.jsZkCopy(new_path, path, max_depth, ccheck)
 	if(!empty(err))
 		myalert(err);
 	else
@@ -313,13 +320,19 @@ function ensureDelChildren()
 {
 	var dlg=$('#del_node_dialog');
 	var path=$('#del_children_dlg_path').val();
+	var max_depth = parseInt($('#del_children_dlg_max_depth').val());
 	if(path=='/')
 	{
 		myalert("can not del children root");
 		return;
 	}
+	if(max_depth<1)
+	{
+		myalert("max_depth should be at least 1");
+		return;
+	}
 	updateDelChildrenProg(0.01,'');
-	err = py.jsZkDeleteChildren(path)
+	err = py.jsZkDeleteChildren(path, max_depth)
 	if(!empty(err))
 		myalert(err);
 	else

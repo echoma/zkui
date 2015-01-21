@@ -51,7 +51,7 @@ class WebWindow(object):
 			file = open(sys.path[0]+'/cfg.json','r')
 			cfg = json.loads(file.read())
 		except Exception as e:
-			pass
+			logging.info(str(e))
 		finally:
 			if file is not None:
 				file.close()
@@ -76,7 +76,7 @@ class WebWindow(object):
 			file.truncate()
 			file.write(json.dumps(cfg))
 		except Exception as e:
-			pass
+			logging.info(str(e))
 		finally:
 			if file is not None:
 				file.close()
@@ -210,10 +210,53 @@ class WebWindow(object):
 			logging.info("jsZkDelete, ZookeeperError")
 			return str(e)
 		return ''
-	@pyqtSlot(str, str, result=str)
-	def jsZkCopyChildren(self, dest_path, ori_path):
+	@pyqtSlot(str, str, int, int, result=str)
+	def jsZkCopy(self, dest_path, ori_path, max_depth, children_only):
+		logging.info("jsZkCopy, dest_path="+dest_path+", ori_path="+ori_path+", children_only="+str(children_only))
+		#copy node first
+		if children_only==0:
+			try:
+				ori_data = self.zk.get(ori_path)
+				if self.zk.exists(dest_path) is None:
+					self.zk.create(dest_path, ori_data[0])
+				else:
+					self.set(dest_path, ori_data[0])
+			except NoNodeError as e:
+				logging.info("jsZkCopy, node, NoNodeError, ori_path="+ori_path+', dest_path='+dest_path)
+				return "node not exists"
+			except ZookeeperError as e:
+				logging.info("jsZkCopy, node, ZookeeperError")
+				return str(e)
+			except Exception as e:
+				return 'exception, '+str(e)
+		#copy children
 		path = ''
 		try:
+			max_depth -= 1;
+			path = ori_path
+			ori_children = self.zk.get_children(ori_path)
+			for child in ori_children:
+				path = ori_path+'/'+child
+				ret = self.jsZkCopy(dest_path+'/'+child, ori_path+'/'+child, max_depth, 0)
+				if isinstance(ret, QVariant):
+					return ret
+				elif len(ret)>0:
+					return ret
+		except NoNodeError as e:
+			logging.info("jsZkCopy, child, NoNodeError")
+			return "node not exists, path="+path
+		except ZookeeperError as e:
+			logging.info("jsZkCopy, child, ZookeeperError")
+			return str(e)+', path='+path
+		except Exception as e:
+			return 'exception, '+str(e)
+		return ''
+	'''
+	@pyqtSlot(str, str, int, result=str)
+	def jsZkCopyChildren(self, dest_path, ori_path, max_depth):
+		path = ''
+		try:
+			max_depth -= 1;
 			logging.info("jsZkCopyChildren, dest_path="+dest_path+", ori_path="+ori_path)
 			path = ori_path
 			ori_children = self.zk.get_children(ori_path)
@@ -227,6 +270,10 @@ class WebWindow(object):
 				data = self.zk.get(path)[0]
 				path = dest_path+'/'+child
 				self.zk.create(path, data)
+				if max_depth>0:
+					ret = self.jsZkCopyChildren(dest_path+'/'+child, ori_path+'/'+child, max_depth)
+					if len(ret)>0:
+						return ret
 		except NoNodeError as e:
 			logging.info("jsZkCopyChildren, NoNodeError")
 			return "node not exists, path="+path
@@ -234,15 +281,21 @@ class WebWindow(object):
 			logging.info("jsZkCopyChildren, ZookeeperError")
 			return str(e)+', path='+path
 		return ''
-	@pyqtSlot(str, result=str)
-	def jsZkDeleteChildren(self, main_path):
+	'''
+	@pyqtSlot(str, int, result=str)
+	def jsZkDeleteChildren(self, main_path, max_depth):
 		path = ''
 		try:
+			max_depth -= 1;
 			path = main_path
 			logging.info("jsZkDeleteChildren, path="+main_path)
 			children = self.zk.get_children(path)
 			for child in children:
 				path = main_path+'/'+child
+				if max_depth>0:
+					ret = self.jsZkDeleteChildren(path, max_depth)
+					if len(ret)>0:
+						return ret
 				self.zk.delete(path)
 		except NoNodeError as e:
 			logging.info("jsZkGetChildren, NoNodeError")

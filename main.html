@@ -19,7 +19,7 @@ body{display:-webkit-flex;-webkit-flex-direction:column;}
 .mainbottom {display:-webkit-flex;-webkit-flex-direction:row;-webkit-flex:1; border-top:0.2em solid gray;}
 .mainbottomlft {-webkit-flex:1;padding:0.2em;display:-webkit-flex;-webkit-flex-direction:column;padding:0.5em;}
 .mainbottomdvd {width:0.125em; background-color:gray; margin-left:0.2em; margin-right:0.2em;}
-.mainbottomrgt {-webkit-flex:3;display:-webkit-flex;-webkit-flex-direction:column;padding:0.2em;}
+.mainbottomrgt {-webkit-flex:4;display:-webkit-flex;-webkit-flex-direction:column;padding:0.2em;}
 .childbox {-webkit-flex:1;display:-webkit-flex;-webkit-flex-direction:row;-webkit-flex-wrap:wrap;-webkit-align-items:flex-start;-webkit-align-content:flex-start;}
 .child {margin-right:0.6em; margin-top:0.6em;}
 .node_val_pnl {-webkit-flex:1;margin-top:0.5em;overflow-y:auto;margin-bottom:0.5em; padding:0.2em;}
@@ -40,15 +40,21 @@ body{display:-webkit-flex;-webkit-flex-direction:column;}
 <div class="mainbottom">
 	<div class="mainbottomlft">
 		<div class="btn-group" role="group" aria-label="..." style="height:2.3em">
-			<button type="button" class="btn btn-warning" onClick="showCreateChildDialog()"><span class="glyphicon glyphicon-plus" aria-hidden="true"></span><b> Create Child</b></button>
-			<button type="button" class="btn btn-info" onClick="showCopyChildrenDialog()" title="Copy all children to another node (but will not copy children's children)"><span class="glyphicon glyphicon-send" aria-hidden="true"></span><b> Copy Children</b></button>
+			<button type="button" class="btn btn-warning" onClick="showCreateChildDialog()"><span class="glyphicon glyphicon-plus" aria-hidden="true"></span><b> Create New Child</b></button>
+			<button type="button" class="btn btn-warning dropdown-toggle" data-toggle="dropdown" aria-expanded="false">
+				<span class="caret"></span>
+				<span class="sr-only"></span>
+			</button>
+			<ul class="dropdown-menu" role="menu">
+				<li><a href="javascript:showCopyChildrenDialog()"><span class="glyphicon glyphicon-send" aria-hidden="true"></span><b> Copy</b></a></li>
+				<li class="divider"></li>
+				<li><a href="javascript:showDelChildrenDialog()"><span class="glyphicon glyphicon-fire" aria-hidden="true"></span><b> Delete All Children</b></a></li>
+				<li><a href="javascript:showDelNodeDialog()"><span class="glyphicon glyphicon-remove" aria-hidden="true"></span><b> Delete Node</b></a></li>
+			</ul>
 		</div>
 		<h4 id="chld_list" class="childbox">
 			<a class="label label-primary child hidden" name="sample">Default</a>
 		</h4>
-		<div class="btn-group" role="group" aria-label="..." style="margin-top:2.2em;height:2.3em">
-			<button type="button" class="btn btn-danger" onClick="showDelChildrenDialog()" title="Delete all children (make sure all children has no children)"><span class="glyphicon glyphicon-fire" aria-hidden="true"></span><b> Delete All Children</b></button>
-		</div>
 	</div>
 	<div class="mainbottomdvd"></div>
 	<div class="mainbottomrgt">
@@ -76,8 +82,7 @@ body{display:-webkit-flex;-webkit-flex-direction:column;}
 		</form>
 		<div style="padding-top:0.5em">
 			<div class="btn-group" role="group" aria-label="...">
-				<button type="button" class="btn btn-warning" title="Edit value" onClick="showEditValDialog()"><span class="glyphicon glyphicon-edit" aria-hidden="true"></span><b> Edit Value</b></button>
-				<button type="button" class="btn btn-danger" onClick="showDelNodeDialog()"><span class="glyphicon glyphicon-remove" aria-hidden="true"></span><b> Delete Node</b></button>
+				<button type="button" class="btn btn-info" title="Edit value" onClick="showEditValDialog()"><span class="glyphicon glyphicon-edit" aria-hidden="true"></span><b> Edit Value</b></button>
 			</div>
 		</div>
 		<div class="panel panel-default node_val_pnl" id="node_value"></div>
@@ -196,21 +201,25 @@ body{display:-webkit-flex;-webkit-flex-direction:column;}
 		<div class="modal-content">
 			<div class="modal-header">
 				<button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
-				<h4 class="modal-title">Copy Children (only 1 level)</h4>
+				<h4 class="modal-title">Copy</h4>
 			</div>
 			<div class="modal-body">
 				<form role="form">
 					<div class="form-group">
-						<label for="copy_children_dlg_path" class="control-label">PATH:</label>
+						<label for="copy_children_dlg_path" class="control-label">From Path:</label>
 						<input type="text" class="form-control" id="copy_children_dlg_path" readonly="1"/>
 					</div>
 					<div class="form-group">
-						<label for="copy_children_dlg_new_path" class="control-label">COPY TO PATH:</label>
+						<label for="copy_children_dlg_new_path" class="control-label">To Path:</label>
 						<input type="text" class="form-control" id="copy_children_dlg_new_path"/>
 					</div>
-					<!--<div class="progress hidden">
-						<div class="progress-bar progress-bar-striped active" role="progressbar" aria-valuenow="1" aria-valuemin="0" aria-valuemax="100" style="width: 1%" id="copy_children_dlg_prg"></div>
-					</div>-->
+					<div class="form-group">
+						<label for="copy_children_dlg_max_depth" class="control-label">Max Depth: <span id="copy_children_dlg_max_depth_val">100</span></label>
+						<input type="range" value="100" min="1" max="100" class="form-control" id="copy_children_dlg_max_depth" onChange="$('#copy_children_dlg_max_depth_val').text(parseInt($('#copy_children_dlg_max_depth').val()))"/>
+					</div>
+					<div class="form-group">
+						<label><input type="checkbox" id="copy_children_dlg_children_only">Copy chilren only</label>
+					</div>
 					<span class="help-block hidden" id="copy_children_dlg_tips"></span>
 				</form>
 			</div>
@@ -234,8 +243,12 @@ body{display:-webkit-flex;-webkit-flex-direction:column;}
 			<div class="modal-body">
 				<form role="form">
 					<div class="form-group">
-						<label for="del_children_dlg_path" class="control-label">PATH:</label>
+						<label for="del_children_dlg_path" class="control-label">Path:</label>
 						<input type="text" class="form-control" id="del_children_dlg_path" readonly="1"/>
+					</div>
+					<div class="form-group">
+						<label for="del_children_dlg_max_depth" class="control-label">Max Depth: <span id="del_children_dlg_max_depth_val">100</span></label>
+						<input type="range" value="100" min="1" max="100" class="form-control" id="del_children_dlg_max_depth" onChange="$('#del_children_dlg_max_depth_val').text(parseInt($('#del_children_dlg_max_depth').val()))"/>
 					</div>
 					<span class="help-block hidden" id="del_children_dlg_tips"></span>
 				</form>
