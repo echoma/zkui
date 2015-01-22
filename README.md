@@ -23,15 +23,15 @@ zkui is a GUI client of [Apache ZooKeeper](http://zookeeper.apache.org/) impleme
 
 * PyQt5 package. 
 
-We use PyQt5 to draw the native window and use its QWebkit to render all the gui component inside the window. 
+> We use PyQt5 to draw the native window and use its QWebkit to render all the gui component inside the window. 
 
-Install this package with this command:  **python3 -m pip install pyqt5**
+> Install this package with this command:  **python3 -m pip install pyqt5**
         
 * Kazoo package.
 
-Kazoo is a pure Python3 implemented ZooKeeper client.
+> Kazoo is a pure Python3 implemented ZooKeeper client.
 
-Install this package with this command: **python3 -m pip install kazoo**
+> Install this package with this command: **python3 -m pip install kazoo**
 
 # run zkui
 Start zkui with this command:  **python3 ./zkui.py**
