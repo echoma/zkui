@@ -2,7 +2,7 @@
 zkui is a GUI client of [Apache ZooKeeper](http://zookeeper.apache.org/) implemented with Python3 + Qt5 + HTML5.
 
 #features
-* Browse the node tree, edit the node's data.
+* Browse the ZooKeeper node tree, edit the node's data.
 * Copy a node to new path **recursively**.
 * Export/Import between node and your local storage **recursively**.
 * Delete node and its children  **recursively**.
