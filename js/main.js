@@ -428,6 +428,102 @@ function ensureDelNode()
 	}
 }
 
+function showExportDialog()
+{
+	var dlg=$('#export_dialog');
+	dlg.modal({backdrop:false}).draggable({handle: ".modal-header"});
+	$('#export_dlg_path').val($('#stat_path').val());
+}
+function ensureExportDialog()
+{
+	var dlg=$('#export_dialog');
+	dlg.modal({backdrop:false}).draggable({handle: ".modal-header"});
+	var path=$('#export_dlg_path').val();
+	if(path=='/zookeeper')
+	{
+		myalert('can not export the zookeeper node');
+		return;
+	}
+	if(path.length>1)
+	{
+		if(path[path.length-1]=='/')
+		{
+			myalert("path can not end with /");
+			return;
+		}
+	}
+	var local_path=$('#export_dlg_local_path').val();
+	if(empty(local_path))
+	{
+		myalert("local path can not be empty");
+		return;
+	}
+	if(local_path[local_path.length-1]=='/')
+	{
+		myalert("local_path can not end with /");
+		return;
+	}
+	var max_depth = parseInt($('#export_dlg_max_depth').val());
+	if(max_depth<1)
+	{
+		myalert("max_depth should be at least 1");
+		return;
+	}
+	err = py.jsZkExport(local_path, path, max_depth)
+	if(!empty(err))
+		myalert("Export failed, err="+err);
+	else
+		myokinfo("Export Success");
+}
+
+function showImportDialog()
+{
+	var dlg=$('#import_dialog');
+	dlg.modal({backdrop:false}).draggable({handle: ".modal-header"});
+	$('#import_dlg_path').val($('#stat_path').val());
+}
+function ensureImportDialog()
+{
+	var dlg=$('#import_dialog');
+	dlg.modal({backdrop:false}).draggable({handle: ".modal-header"});
+	var path=$('#import_dlg_path').val();
+	if(path=='/zookeeper')
+	{
+		myalert('can not import into the zookeeper node');
+		return;
+	}
+	if(path.length>1)
+	{
+		if(path[path.length-1]=='/')
+		{
+			myalert("path can not end with /");
+			return;
+		}
+	}
+	var local_path=$('#import_dlg_local_path').val();
+	if(empty(local_path))
+	{
+		myalert("local path can not be empty");
+		return;
+	}
+	if(local_path[local_path.length-1]=='/')
+	{
+		myalert("local_path can not end with /");
+		return;
+	}
+	var max_depth = parseInt($('#import_dlg_max_depth').val());
+	if(max_depth<1)
+	{
+		myalert("max_depth should be at least 1");
+		return;
+	}
+	err = py.jsZkImport(local_path, path, max_depth)
+	if(!empty(err))
+		myalert("Import failed, err="+err);
+	else
+		myokinfo("Import Success");
+}
+
 function dlgCheckData(format, dialog_id, data_id)
 {
 	var dlg = $('#'+dialog_id);

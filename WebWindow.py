@@ -8,6 +8,7 @@ import time
 import logging
 import json
 import sys
+import pathlib
 
 class WebPage(QtWebKitWidgets.QWebPage):
 	def __init__(self, parent=None):
@@ -298,9 +299,81 @@ class WebWindow(object):
 						return ret
 				self.zk.delete(path)
 		except NoNodeError as e:
-			logging.info("jsZkGetChildren, NoNodeError")
+			logging.info("jsZkDeleteChildren, NoNodeError")
 			return "node not exists, path="+path
 		except ZookeeperError as e:
-			logging.info("jsZkGetChildren, ZookeeperError")
+			logging.info("jsZkDeleteChildren, ZookeeperError")
 			return str(e)+', path='+path
+		except Exception as e:
+			return 'exception, '+str(e)
+		return ''
+	@pyqtSlot(str, str, int, result=str)
+	def jsZkExport(self, local_dir, main_path, max_depth):
+		path = ''
+		try:
+			max_depth -= 1;
+			path = main_path
+			logging.info("jsZkExport, path="+main_path+' to local dir '+local_dir)
+			data = self.zk.get(main_path)
+			p = pathlib.Path(local_dir)
+			if not p.exists():
+				p.mkdir(parents=True)
+			elif not p.is_dir():
+				return 'local '+local_dir+' exists, but not a directory';
+			for child in p.iterdir():
+				return 'local path '+local_dir+' is not empty, clear it first'
+			p = pathlib.Path(local_dir+'/____data')
+			p.touch()
+			obj = open(str(p),'wb')
+			try:
+				obj.write(data[0])
+			finally:
+				obj.close()
+			children = self.zk.get_children(path)
+			for child in children:
+				if child=='zookeeper':
+					continue
+				path = main_path+'/'+child
+				if max_depth>0:
+					ret = self.jsZkExport(local_dir+'/'+child, path, max_depth)
+					if len(ret)>0:
+						return ret
+		except NoNodeError as e:
+			logging.info("jsZkExport, NoNodeError")
+			return "node not exists, path="+path
+		except ZookeeperError as e:
+			logging.info("jsZkExport, ZookeeperError")
+			return str(e)+', path='+path
+		except Exception as e:
+			return 'exception, '+str(e)
+		return ''
+	@pyqtSlot(str, str, int, result=str)
+	def jsZkImport(self, local_dir, main_path, max_depth):
+		path = ''
+		try:
+			max_depth -= 1;
+			path = main_path
+			logging.info("jsZkImport, path="+main_path+' from local dir '+local_dir)
+			obj = open(local_dir+'/____data', 'rb')
+			if self.zk.exists(path) is None:
+				self.zk.create(path, obj.read())
+			else:
+				self.zk.set(path, obj.read())
+			p = pathlib.Path(local_dir)
+			for child in p.iterdir():
+				if not child.is_dir():
+					continue
+				if child.name=='zookeeper':
+					continue
+				ret = self.jsZkImport(str(child), path+'/'+child.name, max_depth)
+				if len(ret)>0:
+					return ret
+		except NoNodeError as e:
+			logging.info("jsZkImport, NoNodeError")
+			return "node not exists, path="+path
+		except ZookeeperError as e:
+			logging.info("jsZkImport, ZookeeperError")
+			return str(e)+', path='+path
+		#except Exception as e:
+		#	return 'exception, '+str(e)
 		return ''
