@@ -9,6 +9,8 @@ import logging
 import json
 import sys
 import pathlib
+import hashlib
+import base64
 
 class WebPage(QtWebKitWidgets.QWebPage):
 	def __init__(self, parent=None):
@@ -81,6 +83,10 @@ class WebWindow(object):
 		finally:
 			if file is not None:
 				file.close()
+	def makeAuth(self, user, plain_pass):
+		m = hashlib.sha1()
+		m.update(bytes(user,'utf8')+b':'+bytes(plain_pass,'utf8'))
+		return base64.b64encode(m.digest())
 	def initJsComm(self):
 		frame = self.webView.page().mainFrame()
 		frame.addToJavaScriptWindowObject('py',self)
@@ -98,8 +104,8 @@ class WebWindow(object):
 		if self.zk is not None:
 			return int(self.zk.state=='CONNECTED')
 		return 0
-	@pyqtSlot(str, result=str)
-	def jsZkConnect(self,host):
+	@pyqtSlot(str, str, result=str)
+	def jsZkConnect(self,host, auth_list_str):
 		try:
 			if self.zk is not None:
 				#self.zk.remove_listener(self.onZkStateChange)
@@ -107,11 +113,15 @@ class WebWindow(object):
 				self.zk.close()
 			self.zk = KazooClient(hosts=host)
 			#self.zk.add_listener(self.onZkStateChange)
-			self.zk.start(6)
+			self.zk.start(15)
+			auth_list = json.loads(auth_list_str)
+			for one in auth_list:
+				cred = self.makeAuth(one['user'], one['pass'])
+				self.zk.add_auth('digest', cred.decode('utf8'))
 		except KazooException as e:
 			return "Zookeeper Error: "+str(e)
-		except Exception as e:
-			return str(e)
+		#except Exception as e:
+		#	return str(e)
 		return ''
 	#def onZkStateChange(self,state):
 	#	frame = self.webView.page().mainFrame()

@@ -23,11 +23,21 @@ $(document).ready(
 		$('#login_btn').click(function(){
 			var host = $('#host').val();
 			py.jsSetCfg('zkhost', host);
-			var authtype = $('#auth_type').val()
-			py.jsSetCfg('zkauthtype', authtype);
-			var authvalue = $('#auth_value').val()
-			py.jsSetCfg('zkauthval', authvalue);
-			var obj = py.jsZkConnect(host)
+			var auth_list = new Array()
+			var dom_auth_list = $('[name=auth_one_line]');
+			for(var i=0; i < dom_auth_list.length; ++i)
+			{
+				var user = dom_auth_list.eq(i).find('[name=auth_user]').val();
+				var pass = dom_auth_list.eq(i).find('[name=auth_pass]').val();
+				if(empty(user) && empty(pass))
+					continue;
+				if(empty(user)!=empty(pass))
+					myalert('user or password can not be empty, index='+i);
+				auth_list.push({'user':user,'pass':pass});
+			}
+			auth_list_str = JSON.stringify(auth_list);
+			py.jsSetCfg('zkauthlist', auth_list_str);
+			var obj = py.jsZkConnect(host,auth_list_str)
 			if(!empty(obj))
 			{
 				myalert("connect() failed: err="+obj)
@@ -46,15 +56,43 @@ $(document).ready(
 		var ohost = py.jsGetCfg('zkhost');
 		if(!empty(ohost))
 			$("#host").val(ohost);
-		var oatype = py.jsGetCfg('zkauthtype');
-		if(!empty(oatype))
-			setAuthType(oatype);
+		var oauth_list = py.jsGetCfg('zkauthlist')
+		if(!empty(oauth_list))
+		{
+			oauth_list = JSON.parse(oauth_list);
+			var dfirst = $('[name=auth_one_line]:first');
+			for(var i=0; i < oauth_list.length; ++i)
+			{
+				var d;
+				if(i==0)
+					d = dfirst;
+				else
+				{
+					d = dfirst.clone();
+					dfirst.parent().append(d);
+				}
+				d.find('[name=auth_user]').val( oauth_list[i].user )
+				d.find('[name=auth_pass]').val( oauth_list[i].pass )
+			}
+		}
 	}
 );
-function setAuthType(type)
+function addAuth(obj)
 {
-	$('#auth_type').val(type);
-	$('#type_select_btn>span').eq(0).text(type);
+	var d=$('[name=auth_one_line]:first');
+	var p = d.parent();
+	p.append(d.clone());
+}
+function delAuth(obj)
+{
+	var d = $(obj).parents('[name=auth_one_line]');
+	if($('[name=auth_one_line]').size()>1)
+		d.remove();
+	else
+	{
+		d.find('[name=auth_user]').val('');
+		d.find('[name=auth_pass]').val('');
+	}
 }
 function myalert(t)
 {
@@ -73,18 +111,16 @@ function myalert(t)
 					<input type="text" class="form-control" id="host" placeholder="e.g. 127.0.0.1:2181,192.168.0.15:2181"/>
 				</div>
 				<div class="form-group">
-					<label for="host">Auth</label>
-					<div class="input-group" role="group" aria-lable="...">
-						<div class="input-group-btn" role="group" id="type_select">
-							<button type="button" class="btn btn-info dropdown-toggle" data-toggle="dropdown" aria-expanded="false" id="type_select_btn"><span>world</span><span class="caret"></span></button>
-							<ul class="dropdown-menu" role="menu" id="type_select_menu">
-								<li><a href="javascript:setAuthType('world')">world</a></li>
-								<li><a href="javascript:setAuthType('digest')">digest</a></li>
-								<li><a href="javascript:setAuthType('ip')">ip</a></li>
-							</ul>
-							<input type="hidden" id="auth_type" value="world"/>
-						</div>
-						<input type="text" id="auth_value" class="form-control" placeholder="only for digest, e.g. user:password-digest"/>
+					<label for="host">Digest Scheme List (keep empty if not use)</label>
+					<div class="input-group" name="auth_one_line">
+						<span class="input-group-addon">user:</span>
+						<input type="text" class="form-control" placeholder="user name" name="auth_user"/>
+						<span class="input-group-addon">pass:</span>
+						<input type="password" class="form-control" placeholder="plain password" name="auth_pass"/>
+						<span class="input-group-btn">
+							<button type="button" class="btn btn-success" name="auth_add_btn" title="add new authentication credential" onClick="addAuth(this)"><span class="glyphicon glyphicon-plus" aria-hidden="true"></span></button>
+							<button type="button" class="btn btn-warning" name="auth_del_btn" title="remove this authentication credential" onClick="delAuth(this)"><span class="glyphicon glyphicon-minus" aria-hidden="true"></span></button>
+						</span>
 					</div>
 				</div>
 				<div class="form-group">

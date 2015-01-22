@@ -17,8 +17,8 @@ app = QApplication(sys.argv)
 
 window = Window()
 window.show()
-window.resize(1150,600)
-window.setMinimumWidth(1150)
+window.resize(960,600)
+window.setMinimumWidth(960)
 window.setMinimumHeight(600)
 window.loadLocalFile('login.html')
 

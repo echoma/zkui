@@ -19,7 +19,7 @@ body{display:-webkit-flex;-webkit-flex-direction:column;}
 .mainbottom {display:-webkit-flex;-webkit-flex-direction:row;-webkit-flex:1; border-top:0.2em solid gray;}
 .mainbottomlft {-webkit-flex:1;padding:0.2em;display:-webkit-flex;-webkit-flex-direction:column;padding:0.5em;}
 .mainbottomdvd {width:0.125em; background-color:gray; margin-left:0.2em; margin-right:0.2em;}
-.mainbottomrgt {-webkit-flex:4;display:-webkit-flex;-webkit-flex-direction:column;padding:0.2em;}
+.mainbottomrgt {-webkit-flex:3;display:-webkit-flex;-webkit-flex-direction:column;padding:0.2em;}
 .childbox {-webkit-flex:1;display:-webkit-flex;-webkit-flex-direction:row;-webkit-flex-wrap:wrap;-webkit-align-items:flex-start;-webkit-align-content:flex-start;}
 .child {margin-right:0.6em; margin-top:0.6em;}
 .node_val_pnl {-webkit-flex:1;margin-top:0.5em;overflow-y:auto;margin-bottom:0.5em; padding:0.2em;}
@@ -93,7 +93,7 @@ body{display:-webkit-flex;-webkit-flex-direction:column;}
 </div>
 
 <div class="modal" id="create_child_dialog">
-	<div class="modal-dialog">
+	<div class="modal-dialog modal-lg">
 		<div class="modal-content">
 			<div class="modal-header">
 				<button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
@@ -121,10 +121,11 @@ body{display:-webkit-flex;-webkit-flex-direction:column;}
 			<div class="modal-footer">
 				<div class="btn-group col-xs-6" role="group" aria-label="...">
 					<button type="button" class="btn btn-success" title="Check whether the value is a valid JSON object string" onClick="dlgCheckData('JSON','create_child_dialog','create_child_dlg_data')">JSON check</button>
+					<button type="button" class="btn btn-primary" title="Edit new node default ACL" onClick="showDefaultAclDialog()">Default ACL</button>
 				</div>
 				<div class="col-xs-6">
 					<button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
-					<button type="button" class="btn btn-primary" onClick="ensureCreateChild()">Create</button>
+					<button type="button" class="btn btn-warning" onClick="ensureCreateChild()">Create</button>
 				</div>
 			</div>
 		</div>
@@ -132,7 +133,7 @@ body{display:-webkit-flex;-webkit-flex-direction:column;}
 </div>
 
 <div class="modal" id="edit_val_dialog">
-	<div class="modal-dialog">
+	<div class="modal-dialog modal-lg">
 		<div class="modal-content">
 			<div class="modal-header">
 				<button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
@@ -326,6 +327,51 @@ body{display:-webkit-flex;-webkit-flex-direction:column;}
 				<div>
 					<button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
 					<button type="button" class="btn btn-danger" onClick="ensureImportDialog()">Start Import</button>
+				</div>
+			</div>
+		</div>
+	</div>
+</div>
+
+<div class="modal" id="default_acl_dialog" style="z-index:9999990;">
+	<div class="modal-dialog">
+		<div class="modal-content">
+			<div class="modal-header">
+				<button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+				<h4 class="modal-title">Default ACL Configuration</h4>
+			</div>
+			<div class="modal-body">
+				<form role="form">
+					<div class="form-group">
+						<div class="btn-group" role="group" aria-label="...">
+							<button type="button" class="btn btn-default" onClick="defaultAclAddIp()">Add IP Scheme</button>
+							<button type="button" class="btn btn-default" onClick="defaultAclAddDigest()">Add Digest Scheme</button>
+						</div>
+					</div>
+					<div class="form-group">
+						<div class="input-group" id="default_acl_dialog_digest_sample">
+							<div class="input-group-addon">user:</div>
+							<input type="text" class="form-control" placeholder="user name" name="user"/>
+							<div class="input-group-addon">pass:</div>
+							<input type="password" class="form-control" placeholder="plain password" name="pass"/>
+							<span class="input-group-btn">
+								<button type="button" class="btn btn-warning" title="remove this ACL" onClick="$(this).remove()"><span class="glyphicon glyphicon-minus" aria-hidden="true"></span></button>
+							</span>
+						</div>
+					</div>
+					<!--<div class="form-group">
+						<div class="input-group" id="default_acl_dialog_ip_sample">
+							<span class="input-group-addon">IP:</span>
+							<input type="text" class="form-control" placeholder="e.g. 192.168.10.1/24" name="ip"/>
+							<button type="button" class="btn btn-warning" title="remove this ACL" onClick="$(this).remove()"><span class="glyphicon glyphicon-minus" aria-hidden="true"></span></button>
+						</div>
+					</div>-->
+				</form>
+			</div>
+			<div class="modal-footer">
+				<div>
+					<button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+					<button type="button" class="btn btn-danger" onClick="saveDefaultAcl()">Save</button>
 				</div>
 			</div>
 		</div>

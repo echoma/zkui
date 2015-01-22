@@ -1,41 +1,41 @@
 # zkui
 zkui is a GUI client of [Apache ZooKeeper](http://zookeeper.apache.org/) implemented with Python3 + Qt5 + HTML5.
 
-[some snapshots](https://github.com/echoma/zkui/wiki/Snapshots)
+[here are some snapshots](https://github.com/echoma/zkui/wiki/Snapshots)
 
-#features
+# Features
 * Browse the ZooKeeper node tree, edit the node's data.
-* Copy a node to new path **recursively**.
-* Export / Import between node and your local storage **recursively**.
-* Delete node and its children  **recursively**.
+* Copy a node to new path recursively.
+* Export / Import between node and your local storage recursively.
+* Delete node and its children  recursively.
 
-#features not supported yet
+# Features not supported yet
 * ACL is not supported yet, zkui can only use "world" currentlly.
 
-# requirement
+# Requirement
 
-### cross OS problem
-* I only test and use zkui on my Ubuntu 14.04 X64 PC.
+### 1. Operating System
+* I only test and use zkui on my Ubuntu Linux 14.04 X64 PC.
 * On MS Windows, multi-bytes charactors are messy. I am new to Python3 and need help to solve this.
 * On MS Windows, the official Kazoo release is buggy, you have to use my modified version. I will upload this on github soon.
 
-### Python3.x
+### 2. Python3.x
 
 * The latest version is 3.4.2 as Ｉwrite this. This is also the recommended version. [download it here](http://python.org/)
 
 * PyQt5 package. 
 
-> We use PyQt5 to draw the native window and use its QWebkit to render all the gui component inside the window. 
+    We use PyQt5 to draw the native window and use its QWebkit to render all the gui component inside the window. 
 
-> Install this package with this command:  **python3 -m pip install pyqt5**
+    Install this package with this command:  **python3 -m pip install pyqt5**
         
 * Kazoo package.
 
-> Kazoo is a pure Python3 implemented ZooKeeper client.
+    Kazoo is a pure Python3 implemented ZooKeeper client.
 
-> Install this package with this command: **python3 -m pip install kazoo**
+    Install this package with this command: **python3 -m pip install kazoo**
 
-# run zkui
+# Run zkui
 Start zkui with this command:  **python3 ./zkui.py**
 
 The UI is composed with three parts:

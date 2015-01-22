@@ -12,7 +12,7 @@ $(document).ready(
 		if(zkuiEnsureConnection())
 			zkuiRefreshPath();
 
-		//$('#create_child_dialog').draggable({handle:'#create_child_dialog .modal-header'})
+		//showDefaultAclDialog();
 	}
 );
 function myalert(text)
@@ -522,6 +522,12 @@ function ensureImportDialog()
 		myalert("Import failed, err="+err);
 	else
 		myokinfo("Import Success");
+}
+
+function showDefaultAclDialog()
+{
+	var dlg=$('#default_acl_dialog');
+	dlg.modal({backdrop:false}).draggable({handle: ".modal-header"});
 }
 
 function dlgCheckData(format, dialog_id, data_id)
