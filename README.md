@@ -8,7 +8,8 @@ zkui is a GUI client of [Apache ZooKeeper](http://zookeeper.apache.org/) impleme
 * Copy a node to new path recursively.
 * Export / Import between node and your local storage recursively.
 * Delete node and its children  recursively.
-* ACL(world,digest,ip) supportted.
+* ACL supportted, sheme including world,digest,ip
+* Use a pre-configured default ACL when create new node
 
 # Requirement
 
