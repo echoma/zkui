@@ -8,16 +8,14 @@ zkui is a GUI client of [Apache ZooKeeper](http://zookeeper.apache.org/) impleme
 * Copy a node to new path recursively.
 * Export / Import between node and your local storage recursively.
 * Delete node and its children  recursively.
-
-# Features not supported yet
-* ACL is not supported yet, zkui can only use "world" currentlly.
+* ACL(world,digest,ip) supportted.
 
 # Requirement
 
 ### 1. Operating System
-* I only test and use zkui on my Ubuntu Linux 14.04 X64 PC.
+* I mainly test and use zkui on my Ubuntu Linux 14.04 X64 PC, so there may be some unkown bugs on other OS.
 * On MS Windows, multi-bytes charactors are messy. I am new to Python3 and need help to solve this.
-* On MS Windows, the official Kazoo release is buggy, you have to use my modified version. I will upload this on github soon.
+* As I tried months ago, On MS Windows, the official Kazoo release is buggy, you have to use my modified version. I will upload this on github soon.
 
 ### 2. Python3.x
 
@@ -27,7 +25,9 @@ zkui is a GUI client of [Apache ZooKeeper](http://zookeeper.apache.org/) impleme
 
     We use PyQt5 to draw the native window and use its QWebkit to render all the gui component inside the window. 
 
-    Install this package with this command:  **python3 -m pip install pyqt5**
+    On Linux distribution, you can install it through software center, or download [source code](http://www.riverbankcomputing.com/software/pyqt/download5) and compile it by yourself.
+    
+    On MS Windows, you can install it via a [binary installer](http://www.riverbankcomputing.com/software/pyqt/download5)
         
 * Kazoo package.
 

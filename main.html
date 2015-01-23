@@ -61,11 +61,11 @@ body{display:-webkit-flex;-webkit-flex-direction:column;}
 	</div>
 	<div class="mainbottomdvd"></div>
 	<div class="mainbottomrgt">
-		<div class="input-group">
-			<span class="input-group-addon">PATH</span>
-			<input type="text" class="form-control" readonly="1" placeholder="Not Got Yet" id="stat_path" size="5">
-		</div>
 		<form class="form-inline" role="form" id="node_misc_prop">
+			<div class="input-group">
+				<span class="input-group-addon">PATH</span>
+				<input type="text" class="form-control" readonly="1" placeholder="Not Got Yet" id="stat_path" size="20">
+			</div>
 			<div class="input-group">
 				<span class="input-group-addon">VERSION</span>
 				<input type="text" class="form-control" readonly="1" placeholder="Not Got Yet" id="stat_version" size="5">
@@ -86,9 +86,11 @@ body{display:-webkit-flex;-webkit-flex-direction:column;}
 		<div style="padding-top:0.5em">
 			<div class="btn-group" role="group" aria-label="...">
 				<button type="button" class="btn btn-info" title="Edit value" onClick="showEditValDialog()"><span class="glyphicon glyphicon-edit" aria-hidden="true"></span><b> Edit Value</b></button>
+				<button type="button" class="btn btn-info" title="Edit ACL" onClick="showEditAclDialog()"><span class="glyphicon glyphicon-road" aria-hidden="true"></span><b> Edit ACL</b></button>
 			</div>
 		</div>
-		<div class="panel panel-default node_val_pnl" id="node_value"></div>
+		<textarea class="panel panel-default node_val_pnl" id="node_value" readonly="1"></textarea>
+		<textarea style="display:none" id="node_acl_data"></textarea>
 	</div>
 </div>
 
@@ -344,34 +346,200 @@ body{display:-webkit-flex;-webkit-flex-direction:column;}
 				<form role="form">
 					<div class="form-group">
 						<div class="btn-group" role="group" aria-label="...">
+							<button type="button" class="btn btn-default" onClick="defaultAclAddWorld()">Add World Scheme</button>
 							<button type="button" class="btn btn-default" onClick="defaultAclAddIp()">Add IP Scheme</button>
 							<button type="button" class="btn btn-default" onClick="defaultAclAddDigest()">Add Digest Scheme</button>
 						</div>
 					</div>
-					<div class="form-group">
-						<div class="input-group" id="default_acl_dialog_digest_sample">
+					<div class="form-group" style="display:none" id="default_acl_dialog_world_sample">
+						<div class="input-group">
+							<div class="input-group-addon">world:</div>
+							<input type="text" class="form-control" value="anyone" name="id" readonly="1" />
+							<div class="input-group-btn">
+								<button type="button" name="perm_btn" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-expanded="false" style="height:2.45em"><span name="perm_name">None Perm</span> <span class="caret"></span></button>
+								<ul class="dropdown-menu" role="menu" name="perm_list">
+									<li><label><input type="checkbox" name="perm_r" value="1" onChange="defaultAclCheckOnChange(this)" sub="1"> (R)ead</label></li>
+									<li><label><input type="checkbox" name="perm_w" value="1" onChange="defaultAclCheckOnChange(this)" sub="1"> (W)rite</label></li>
+									<li><label><input type="checkbox" name="perm_c" value="1" onChange="defaultAclCheckOnChange(this)" sub="1"> (C)reate</label></li>
+									<li><label><input type="checkbox" name="perm_d" value="1" onChange="defaultAclCheckOnChange(this)" sub="1"> (D)elete</label></li>
+									<li><label><input type="checkbox" name="perm_a" value="1" onChange="defaultAclCheckOnChange(this)" sub="1"> (A)dmin</label></li>
+									<li class="divider"></li>
+									<li><label><input type="checkbox" name="perm_all" value="1" onChange="defaultAclCheckOnChange(this)"> ALL</label></li>
+								</ul>
+							</div>
+							<div class="input-group-btn">
+								<button type="button" class="btn btn-warning" style="height:2.45em" title="remove this ACL" onClick="$(this).parents('[name=default_acl_dialog_world]').remove()"><span class="glyphicon glyphicon-minus" aria-hidden="true"></span></button>
+							</div>
+						</div>
+					</div>
+					<div class="form-group" style="display:none" id="default_acl_dialog_digest_sample">
+						<div class="input-group">
 							<div class="input-group-addon">user:</div>
 							<input type="text" class="form-control" placeholder="user name" name="user"/>
 							<div class="input-group-addon">pass:</div>
 							<input type="password" class="form-control" placeholder="plain password" name="pass"/>
-							<span class="input-group-btn">
-								<button type="button" class="btn btn-warning" title="remove this ACL" onClick="$(this).remove()"><span class="glyphicon glyphicon-minus" aria-hidden="true"></span></button>
-							</span>
+							<div class="input-group-btn">
+								<button type="button" name="perm_btn" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-expanded="false" style="height:2.45em"><span name="perm_name">None Perm</span> <span class="caret"></span></button>
+								<ul class="dropdown-menu" role="menu" name="perm_list">
+									<li><label><input type="checkbox" name="perm_r" value="1" onChange="defaultAclCheckOnChange(this)" sub="1"> (R)ead</label></li>
+									<li><label><input type="checkbox" name="perm_w" value="1" onChange="defaultAclCheckOnChange(this)" sub="1"> (W)rite</label></li>
+									<li><label><input type="checkbox" name="perm_c" value="1" onChange="defaultAclCheckOnChange(this)" sub="1"> (C)reate</label></li>
+									<li><label><input type="checkbox" name="perm_d" value="1" onChange="defaultAclCheckOnChange(this)" sub="1"> (D)elete</label></li>
+									<li><label><input type="checkbox" name="perm_a" value="1" onChange="defaultAclCheckOnChange(this)" sub="1"> (A)dmin</label></li>
+									<li class="divider"></li>
+									<li><label><input type="checkbox" name="perm_all" value="1" onChange="defaultAclCheckOnChange(this)"> ALL</label></li>
+								</ul>
+							</div>
+							<div class="input-group-btn">
+								<button type="button" class="btn btn-warning" style="height:2.45em" title="remove this ACL" onClick="$(this).parents('[name=default_acl_dialog_digest]').remove()"><span class="glyphicon glyphicon-minus" aria-hidden="true"></span></button>
+							</div>
 						</div>
 					</div>
-					<!--<div class="form-group">
-						<div class="input-group" id="default_acl_dialog_ip_sample">
+					<div class="form-group" style="display:none" id="default_acl_dialog_ip_sample">
+						<div class="input-group">
 							<span class="input-group-addon">IP:</span>
 							<input type="text" class="form-control" placeholder="e.g. 192.168.10.1/24" name="ip"/>
-							<button type="button" class="btn btn-warning" title="remove this ACL" onClick="$(this).remove()"><span class="glyphicon glyphicon-minus" aria-hidden="true"></span></button>
+							<div class="input-group-btn">
+								<button type="button" name="perm_btn" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-expanded="false" style="height:2.45em"><span name="perm_name">None Perm</span> <span class="caret"></span></button>
+								<ul class="dropdown-menu" role="menu" name="perm_list">
+									<li><label><input type="checkbox" name="perm_r" value="1" onChange="defaultAclCheckOnChange(this)" sub="1"> (R)ead</label></li>
+									<li><label><input type="checkbox" name="perm_w" value="1" onChange="defaultAclCheckOnChange(this)" sub="1"> (W)rite</label></li>
+									<li><label><input type="checkbox" name="perm_c" value="1" onChange="defaultAclCheckOnChange(this)" sub="1"> (C)reate</label></li>
+									<li><label><input type="checkbox" name="perm_d" value="1" onChange="defaultAclCheckOnChange(this)" sub="1"> (D)elete</label></li>
+									<li><label><input type="checkbox" name="perm_a" value="1" onChange="defaultAclCheckOnChange(this)" sub="1"> (A)dmin</label></li>
+									<li class="divider"></li>
+									<li><label><input type="checkbox" name="perm_all" value="1" onChange="defaultAclCheckOnChange(this)"> ALL</label></li>
+								</ul>
+							</div>
+							<div class="input-group-btn">
+								<button type="button" class="btn btn-warning" style="height:2.45em" title="remove this ACL" onClick="$(this).parents('[name=default_acl_dialog_ip]').remove()"><span class="glyphicon glyphicon-minus" aria-hidden="true"></span></button>
+							</div>
 						</div>
-					</div>-->
+					</div>
 				</form>
 			</div>
 			<div class="modal-footer">
 				<div>
 					<button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
 					<button type="button" class="btn btn-danger" onClick="saveDefaultAcl()">Save</button>
+				</div>
+			</div>
+		</div>
+	</div>
+</div>
+
+<div class="modal" id="edit_acl_dialog">
+	<div class="modal-dialog modal-lg">
+		<div class="modal-content">
+			<div class="modal-header">
+				<button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+				<h4 class="modal-title">Edit Node ACL</h4>
+			</div>
+			<div class="modal-body">
+				<form role="form">
+					<div class="form-group">
+						<label for="edit_acl_dlg_name" class="control-label">PATH:</label>
+						<input type="text" class="form-control" id="edit_acl_dlg_path" readonly="1"/>
+					</div>
+					<div class="form-group">
+						<div class="btn-group" role="group" aria-label="...">
+							<button type="button" class="btn btn-default" onClick="editAclDlgAddWorld()">Add World Scheme</button>
+							<button type="button" class="btn btn-default" onClick="editAclDlgAddIp()">Add IP Scheme</button>
+							<button type="button" class="btn btn-default" onClick="editAclDlgAddDigest()">Add Digest Scheme</button>
+						</div>
+					</div>
+					<div class="form-group" style="display:none" id="edit_acl_dlg_world_sample">
+						<div class="input-group">
+							<div class="input-group-addon">world:</div>
+							<input type="text" class="form-control" value="anyone" name="id" readonly="1" />
+							<div class="input-group-btn">
+								<button type="button" name="perm_btn" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-expanded="false" style="height:2.45em"><span name="perm_name">None Perm</span> <span class="caret"></span></button>
+								<ul class="dropdown-menu" role="menu" name="perm_list">
+									<li><label><input type="checkbox" name="perm_r" value="1" onChange="editAclCheckOnChange(this)" sub="1"> (R)ead</label></li>
+									<li><label><input type="checkbox" name="perm_w" value="1" onChange="editAclCheckOnChange(this)" sub="1"> (W)rite</label></li>
+									<li><label><input type="checkbox" name="perm_c" value="1" onChange="editAclCheckOnChange(this)" sub="1"> (C)reate</label></li>
+									<li><label><input type="checkbox" name="perm_d" value="1" onChange="editAclCheckOnChange(this)" sub="1"> (D)elete</label></li>
+									<li><label><input type="checkbox" name="perm_a" value="1" onChange="editAclCheckOnChange(this)" sub="1"> (A)dmin</label></li>
+									<li class="divider"></li>
+									<li><label><input type="checkbox" name="perm_all" value="1" onChange="editAclCheckOnChange(this)"> ALL</label></li>
+								</ul>
+							</div>
+							<div class="input-group-btn">
+								<button type="button" class="btn btn-warning" style="height:2.45em" title="remove this ACL" onClick="$(this).parents('[name=edit_acl_dlg_world]').remove()"><span class="glyphicon glyphicon-minus" aria-hidden="true"></span></button>
+							</div>
+						</div>
+					</div>
+					<div class="form-group" style="display:none" id="edit_acl_dlg_digest_sample">
+						<div class="input-group">
+							<div class="input-group-addon">user:</div>
+							<input type="text" class="form-control" placeholder="user name" name="user"/>
+							<div class="input-group-addon">pass:</div>
+							<input type="password" class="form-control" placeholder="original plain password" name="pass"/>
+							<div class="input-group-btn">
+								<button type="button" name="perm_btn" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-expanded="false" style="height:2.45em"><span name="perm_name">None Perm</span> <span class="caret"></span></button>
+								<ul class="dropdown-menu" role="menu" name="perm_list">
+									<li><label><input type="checkbox" name="perm_r" value="1" onChange="editAclCheckOnChange(this)" sub="1"> (R)ead</label></li>
+									<li><label><input type="checkbox" name="perm_w" value="1" onChange="editAclCheckOnChange(this)" sub="1"> (W)rite</label></li>
+									<li><label><input type="checkbox" name="perm_c" value="1" onChange="editAclCheckOnChange(this)" sub="1"> (C)reate</label></li>
+									<li><label><input type="checkbox" name="perm_d" value="1" onChange="editAclCheckOnChange(this)" sub="1"> (D)elete</label></li>
+									<li><label><input type="checkbox" name="perm_a" value="1" onChange="editAclCheckOnChange(this)" sub="1"> (A)dmin</label></li>
+									<li class="divider"></li>
+									<li><label><input type="checkbox" name="perm_all" value="1" onChange="editAclCheckOnChange(this)"> ALL</label></li>
+								</ul>
+							</div>
+							<div class="input-group-btn">
+								<button type="button" class="btn btn-warning" style="height:2.45em" title="remove this ACL" onClick="$(this).parents('[name=edit_acl_dlg_digest]').remove()"><span class="glyphicon glyphicon-minus" aria-hidden="true"></span></button>
+							</div>
+						</div>
+					</div>
+					<div class="form-group" style="display:none" id="edit_acl_dlg_digest_sample2">
+						<div class="input-group">
+							<div class="input-group-addon">digest id:</div>
+							<input type="text" class="form-control" placeholder="e.g. user:dGhpc2lzcGFzc3dvcmQK" name="id"/>
+							<div class="input-group-btn">
+								<button type="button" name="perm_btn" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-expanded="false" style="height:2.45em"><span name="perm_name">None Perm</span> <span class="caret"></span></button>
+								<ul class="dropdown-menu" role="menu" name="perm_list">
+									<li><label><input type="checkbox" name="perm_r" value="1" onChange="editAclCheckOnChange(this)" sub="1"> (R)ead</label></li>
+									<li><label><input type="checkbox" name="perm_w" value="1" onChange="editAclCheckOnChange(this)" sub="1"> (W)rite</label></li>
+									<li><label><input type="checkbox" name="perm_c" value="1" onChange="editAclCheckOnChange(this)" sub="1"> (C)reate</label></li>
+									<li><label><input type="checkbox" name="perm_d" value="1" onChange="editAclCheckOnChange(this)" sub="1"> (D)elete</label></li>
+									<li><label><input type="checkbox" name="perm_a" value="1" onChange="editAclCheckOnChange(this)" sub="1"> (A)dmin</label></li>
+									<li class="divider"></li>
+									<li><label><input type="checkbox" name="perm_all" value="1" onChange="editAclCheckOnChange(this)"> ALL</label></li>
+								</ul>
+							</div>
+							<div class="input-group-btn">
+								<button type="button" class="btn btn-warning" style="height:2.45em" title="remove this ACL" onClick="$(this).parents('[name=edit_acl_dlg_digest]').remove()"><span class="glyphicon glyphicon-minus" aria-hidden="true"></span></button>
+							</div>
+						</div>
+					</div>
+					<div class="form-group" style="display:none" id="edit_acl_dlg_ip_sample">
+						<div class="input-group">
+							<span class="input-group-addon">IP:</span>
+							<input type="text" class="form-control" placeholder="e.g. 192.168.10.1/24" name="ip"/>
+							<div class="input-group-btn">
+								<button type="button" name="perm_btn" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-expanded="false" style="height:2.45em"><span name="perm_name">None Perm</span> <span class="caret"></span></button>
+								<ul class="dropdown-menu" role="menu" name="perm_list">
+									<li><label><input type="checkbox" name="perm_r" value="1" onChange="editAclCheckOnChange(this)" sub="1"> (R)ead</label></li>
+									<li><label><input type="checkbox" name="perm_w" value="1" onChange="editAclCheckOnChange(this)" sub="1"> (W)rite</label></li>
+									<li><label><input type="checkbox" name="perm_c" value="1" onChange="editAclCheckOnChange(this)" sub="1"> (C)reate</label></li>
+									<li><label><input type="checkbox" name="perm_d" value="1" onChange="editAclCheckOnChange(this)" sub="1"> (D)elete</label></li>
+									<li><label><input type="checkbox" name="perm_a" value="1" onChange="editAclCheckOnChange(this)" sub="1"> (A)dmin</label></li>
+									<li class="divider"></li>
+									<li><label><input type="checkbox" name="perm_all" value="1" onChange="editAclCheckOnChange(this)"> ALL</label></li>
+								</ul>
+							</div>
+							<div class="input-group-btn">
+								<button type="button" class="btn btn-warning" style="height:2.45em" title="remove this ACL" onClick="$(this).parents('[name=edit_acl_dlg_ip]').remove()"><span class="glyphicon glyphicon-minus" aria-hidden="true"></span></button>
+							</div>
+						</div>
+					</div>
+				</form>
+			</div>
+			<div class="modal-footer container-fluid">
+				<div>
+					<button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+					<button type="button" class="btn btn-primary" onClick="ensureEditAcl()">Edit</button>
 				</div>
 			</div>
 		</div>

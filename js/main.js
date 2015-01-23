@@ -12,7 +12,7 @@ $(document).ready(
 		if(zkuiEnsureConnection())
 			zkuiRefreshPath();
 
-		//showDefaultAclDialog();
+		//showDefaultAclDialog();//defaultAclAddDigest();
 	}
 );
 function myalert(text)
@@ -174,35 +174,50 @@ function zkuiStatUpdate(stat)
 function zkuiValueUpdate(data)
 {
 	if(typeof(data)=='string')
-		$('#node_value').text(data);
+		$('#node_value').val(data);
 	else
-		$('#node_value').text(data.toString());
+		$('#node_value').val(data.toString());
+}
+var perm_r = 1;
+var perm_w = 2;
+var perm_c = 4;
+var perm_d = 8;
+var perm_a = 16;
+var perm_all = 31;
+function getPermString(perm)
+{
+	if(perm==0)
+		return 'NONE';
+	else if(perm==perm_all)
+		return 'ALL';
+	else
+	{
+		var t = '';
+		if(perm & perm_r)
+			t += 'R';
+		if(perm & perm_w)
+			t += 'W';
+		if(perm & perm_c)
+			t += 'C';
+		if(perm & perm_d)
+			t += 'D';
+		if(perm & perm_a)
+			t += 'A';
+		return t;
+	}
 }
 function zkuiAclUpdate(acl_list)
 {
+	$('#node_acl_data').val(JSON.stringify(acl_list));
 	var dom = $('#node_misc_prop');
 	dom.find('[name=acl_real]').remove();
 	var spl = dom.find('[name=acl_sample]');
 	for(var i=0; i<acl_list.length; ++i)
 	{
-		var acl=acl_list[i], perm_str='';
-		if(acl.perms&31)
-			perm_str+='ALL';
-		else
-		{
-			if(acl.perms&1)
-				perm_str+='r';
-			if(acl.perms&2)
-				perm_str+='w';
-			if(acl.perms&4)
-				perm_str+='c';
-			if(acl.perms&8)
-				perm_str+='d';
-			if(acl.perms&16)
-				perm_str+='a';
-		}
+		var acl=acl_list[i];
+		var perm_str=getPermString(acl.perm);
 		var d = spl.clone().removeClass('hidden').attr('name','acl_real');
-		d.find('input').val(perm_str+'@'+acl.scheme+'@'+acl.digest);
+		d.find('input').val(acl.scheme+' '+acl.id+' '+perm_str);
 		dom.append(d);
 	}
 }
@@ -357,7 +372,7 @@ function showEditValDialog()
 	dlg.modal({backdrop:false}).draggable({handle: ".modal-header"});
 	$('#edit_val_dlg_path').val($('#stat_path').val());
 	$('#edit_val_dlg_version').text($('#stat_version').val());
-	$('#edit_val_dlg_data').val($('#node_value').text());
+	$('#edit_val_dlg_data').val($('#node_value').val());
 	setTimeout("$('#edit_val_dlg_data').focus().select();",100);
 }
 function ensureEditVal()
@@ -528,7 +543,359 @@ function showDefaultAclDialog()
 {
 	var dlg=$('#default_acl_dialog');
 	dlg.modal({backdrop:false}).draggable({handle: ".modal-header"});
+	dlg.find('[name=default_acl_dialog_world]').remove();
+	dlg.find('[name=default_acl_dialog_digest]').remove();
+	dlg.find('[name=default_acl_dialog_ip]').remove();
+	list = JSON.parse(py.jsGetDefaultAcl());
+	for(var i=0; i<list.length; ++i)
+	{
+		one = list[i];
+		if(one.scheme=='world')
+		{
+			var d = defaultAclAddWorld();
+			d.find('[name=id]').val('anyone');
+			defaultAclUpdatePermCheck(d, one['perm']);
+			defaultAclUpdatePermName(d, one['perm']);
+		}
+		else if(one.scheme=='digest')
+		{
+			var d = defaultAclAddDigest();
+			d.find('[name=user]').val(one['user']);
+			d.find('[name=pass]').val(one['pass']);
+			defaultAclUpdatePermCheck(d, one['perm']);
+			defaultAclUpdatePermName(d, one['perm']);
+		}
+		else if(one.scheme=='ip')
+		{
+			var d = defaultAclAddIp();
+			d.find('[name=ip]').val(one['ip']);
+			defaultAclUpdatePermCheck(d, one['perm']);
+			defaultAclUpdatePermName(d, one['perm']);
+		}
+	}
 }
+function defaultAclAddWorld()
+{
+	var spl = $('#default_acl_dialog_world_sample');
+	var d = spl.clone().removeAttr('id').attr('name', 'default_acl_dialog_world');
+	spl.parent().append(d);
+	d.show();
+	return d;
+}
+function defaultAclAddDigest()
+{
+	var spl = $('#default_acl_dialog_digest_sample');
+	var d = spl.clone().removeAttr('id').attr('name', 'default_acl_dialog_digest');
+	spl.parent().append(d);
+	d.show();
+	return d;
+}
+function defaultAclAddIp()
+{
+	var spl = $('#default_acl_dialog_ip_sample');
+	var d = spl.clone().removeAttr('id').attr('name', 'default_acl_dialog_ip');
+	spl.parent().append(d);
+	d.show();
+	return d;
+}
+function saveDefaultAcl()
+{
+	var dlg=$('#default_acl_dialog');
+	var list = [];
+	var dlist = dlg.find('[name=default_acl_dialog_world]');
+	for(var i=0; i<dlist.length; ++i)
+	{
+		var perm = editAclGetPerm(dlist.eq(i))
+		var id = dlist.eq(i).find('[name=id]').val();
+		if(!empty(id) && id=='anyone')
+			list.push({'scheme':'world', 'id':id, 'perm':perm})
+	}
+	var dlist = dlg.find('[name=default_acl_dialog_ip]');
+	for(var i=0; i<dlist.length; ++i)
+	{
+		var perm = defaultAclGetPerm(dlist.eq(i))
+		var ip = dlist.eq(i).find('[name=ip]').val();
+		if(!empty(ip))
+			list.push({'scheme':'ip', 'ip':ip, 'perm':perm})
+	}
+	var dlist = dlg.find('[name=default_acl_dialog_digest]');
+	for(var i=0; i<dlist.length; ++i)
+	{
+		var perm = defaultAclGetPerm(dlist.eq(i))
+		var user = dlist.eq(i).find('[name=user]').val();
+		var pass = dlist.eq(i).find('[name=pass]').val();
+		if(empty(user) && empty(pass))
+			continue;
+		if(empty(user) != empty(pass))
+		{
+			dlgShowAlert('Please complete the user:pass');
+			return;
+		}
+		list.push({'scheme':'digest', 'user':user, 'pass':pass, 'perm':perm})
+	}
+	var err = py.jsSetDefaultAcl(JSON.stringify(list))
+	if(!empty(err))
+		myalert("Save failed, err="+err);
+	else
+		myokinfo("Save Success");
+}
+function defaultAclCheckOnChange(chk)
+{
+	var line = $(chk).parents('[name=default_acl_dialog_digest]');
+	if(line.length==0)
+		line = $(chk).parents('[name=default_acl_dialog_ip]');
+	if(line.length==0)
+		line = $(chk).parents('[name=default_acl_dialog_world]');
+	if($(chk).attr('name')=='perm_all')
+	{
+		if($(chk).filter(':checked').length)
+			line.find('[sub=1]').val([1]);
+		else
+			line.find('[sub=1]').val([]);
+	}
+	else
+	{
+		if(line.find('[sub=1]:checked').length == line.find('[sub=1]').length)
+			line.find('[name=perm_all]').val([1]);
+		else
+			line.find('[name=perm_all]').val([0]);
+	}
+	var perm = defaultAclGetPerm(line);
+	defaultAclUpdatePermName(line, perm);
+}
+function defaultAclGetPerm(line)
+{
+	var perm = 0;
+	if(line.find('[name=perm_all]:checked').length)
+		perm = perm_all;
+	else
+	{
+		if(line.find('[name=perm_r]:checked').length)
+			perm |= perm_r;
+		if(line.find('[name=perm_w]:checked').length)
+			perm |= perm_w;
+		if(line.find('[name=perm_c]:checked').length)
+			perm |= perm_c;
+		if(line.find('[name=perm_d]:checked').length)
+			perm |= perm_d;
+		if(line.find('[name=perm_a]:checked').length)
+			perm |= perm_a;
+	}
+	return perm;
+}
+function defaultAclUpdatePermName(line, perm)
+{
+	var d = line.find('[name=perm_name]');
+	d.text(getPermString(perm));
+}
+function defaultAclUpdatePermCheck(line, perm)
+{
+	if(perm==perm_all)
+		line.find('[name=perm_all]').val([1])
+	else
+	{
+		if(perm==perm_r)
+			line.find('[name=perm_r]').val([1])
+		if(perm==perm_w)
+			line.find('[name=perm_w]').val([1])
+		if(perm==perm_c)
+			line.find('[name=perm_c]').val([1])
+		if(perm==perm_d)
+			line.find('[name=perm_d]').val([1])
+		if(perm==perm_a)
+			line.find('[name=perm_a]').val([1])
+	}
+}
+
+
+function showEditAclDialog()
+{
+	var dlg=$('#edit_acl_dialog');
+	dlg.modal({backdrop:false}).draggable({handle: ".modal-header"});
+	dlg.find('#edit_acl_dlg_path').val($('#stat_path').val());
+	dlg.find('[name=edit_acl_dlg_world]').remove();
+	dlg.find('[name=edit_acl_dlg_digest]').remove();
+	dlg.find('[name=edit_acl_dlg_ip]').remove();
+	list = JSON.parse($('#node_acl_data').val());
+	for(var i=0; i<list.length; ++i)
+	{
+		one = list[i];
+		if(one.scheme=='world')
+		{
+			var d = editAclDlgAddWorld();
+			d.find('[name=id]').val(one['id']);
+			editAclUpdatePermCheck(d, one['perm']);
+			editAclUpdatePermName(d, one['perm']);
+		}
+		else if(one.scheme=='digest')
+		{
+			var d = editAclDlgAddDigest2();
+			d.find('[name=id]').val(one['id']);
+			editAclUpdatePermCheck(d, one['perm']);
+			editAclUpdatePermName(d, one['perm']);
+		}
+		else if(one.scheme=='ip')
+		{
+			var d = editAclDlgAddIp();
+			d.find('[name=ip]').val(one['id']);
+			editAclUpdatePermCheck(d, one['perm']);
+			editAclUpdatePermName(d, one['perm']);
+		}
+	}
+}
+function editAclDlgAddWorld()
+{
+	var spl = $('#edit_acl_dlg_world_sample');
+	var d = spl.clone().removeAttr('id').attr('name', 'edit_acl_dlg_world');
+	spl.parent().append(d);
+	d.show();
+	return d;
+}
+function editAclDlgAddDigest()
+{
+	var spl = $('#edit_acl_dlg_digest_sample');
+	var d = spl.clone().removeAttr('id').attr('name', 'edit_acl_dlg_digest');
+	spl.parent().append(d);
+	d.show();
+	return d;
+}
+function editAclDlgAddDigest2()
+{
+	var spl = $('#edit_acl_dlg_digest_sample2');
+	var d = spl.clone().removeAttr('id').attr('name', 'edit_acl_dlg_digest');
+	spl.parent().append(d);
+	d.show();
+	return d;
+}
+function editAclDlgAddIp()
+{
+	var spl = $('#edit_acl_dlg_ip_sample');
+	var d = spl.clone().removeAttr('id').attr('name', 'edit_acl_dlg_ip');
+	spl.parent().append(d);
+	d.show();
+	return d;
+}
+function ensureEditAcl()
+{
+	var dlg=$('#edit_acl_dialog');
+	var path=$('#edit_acl_dlg_path').val();
+	var list = [];
+	var dlist = dlg.find('[name=edit_acl_dlg_world]');
+	for(var i=0; i<dlist.length; ++i)
+	{
+		var perm = editAclGetPerm(dlist.eq(i))
+		var id = dlist.eq(i).find('[name=id]').val();
+		if(!empty(id) && id=='anyone')
+			list.push({'scheme':'world', 'id':id, 'perm':perm})
+	}
+	var dlist = dlg.find('[name=edit_acl_dlg_ip]');
+	for(var i=0; i<dlist.length; ++i)
+	{
+		var perm = editAclGetPerm(dlist.eq(i))
+		var ip = dlist.eq(i).find('[name=ip]').val();
+		if(!empty(ip))
+			list.push({'scheme':'ip', 'ip':ip, 'perm':perm})
+	}
+	var dlist = dlg.find('[name=edit_acl_dlg_digest]');
+	for(var i=0; i<dlist.length; ++i)
+	{
+		var perm = editAclGetPerm(dlist.eq(i))
+		if(dlist.eq(i).find('[name=id]').length)
+		{
+			var id = dlist.eq(i).find('[name=id]').val();
+			if(empty(id))
+				continue
+			list.push({'scheme':'digest', 'id':id, 'perm':perm})
+		}
+		else
+		{
+			var user = dlist.eq(i).find('[name=user]').val();
+			var pass = dlist.eq(i).find('[name=pass]').val();
+			if(empty(user) && empty(pass))
+				continue;
+			if(empty(user) != empty(pass))
+			{
+				dlgShowAlert('Please complete the user:pass');
+				return;
+			}
+			list.push({'scheme':'digest', 'user':user, 'pass':pass, 'perm':perm})
+		}
+	}
+	var err = py.jsZkSetAcl(path, JSON.stringify(list))
+	if(!empty(err))
+		myalert("Edit failed, err="+err);
+	else
+		myokinfo("Edit Success");
+}
+function editAclCheckOnChange(chk)
+{
+	var line = $(chk).parents('[name=edit_acl_dlg_digest]');
+	if(line.length==0)
+		line = $(chk).parents('[name=edit_acl_dlg_ip]');
+	if(line.length==0)
+		line = $(chk).parents('[name=edit_acl_dlg_world]');
+	if($(chk).attr('name')=='perm_all')
+	{
+		if($(chk).filter(':checked').length)
+			line.find('[sub=1]').val([1]);
+		else
+			line.find('[sub=1]').val([]);
+	}
+	else
+	{
+		if(line.find('[sub=1]:checked').length == line.find('[sub=1]').length)
+			line.find('[name=perm_all]').val([1]);
+		else
+			line.find('[name=perm_all]').val([0]);
+	}
+	var perm = editAclGetPerm(line);
+	editAclUpdatePermName(line, perm);
+}
+function editAclGetPerm(line)
+{
+	var perm = 0;
+	if(line.find('[name=perm_all]:checked').length)
+		perm = perm_all;
+	else
+	{
+		if(line.find('[name=perm_r]:checked').length)
+			perm |= perm_r;
+		if(line.find('[name=perm_w]:checked').length)
+			perm |= perm_w;
+		if(line.find('[name=perm_c]:checked').length)
+			perm |= perm_c;
+		if(line.find('[name=perm_d]:checked').length)
+			perm |= perm_d;
+		if(line.find('[name=perm_a]:checked').length)
+			perm |= perm_a;
+	}
+	return perm;
+}
+function editAclUpdatePermName(line, perm)
+{
+	var d = line.find('[name=perm_name]');
+	d.text(getPermString(perm));
+}
+function editAclUpdatePermCheck(line, perm)
+{
+	if(perm==perm_all)
+		line.find('[name=perm_all]').val([1])
+	else
+	{
+		if(perm==perm_r)
+			line.find('[name=perm_r]').val([1])
+		if(perm==perm_w)
+			line.find('[name=perm_w]').val([1])
+		if(perm==perm_c)
+			line.find('[name=perm_c]').val([1])
+		if(perm==perm_d)
+			line.find('[name=perm_d]').val([1])
+		if(perm==perm_a)
+			line.find('[name=perm_a]').val([1])
+	}
+}
+
+
 
 function dlgCheckData(format, dialog_id, data_id)
 {
