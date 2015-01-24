@@ -1,7 +1,7 @@
 # zkui
 zkui is a GUI client of [Apache ZooKeeper](http://zookeeper.apache.org/) implemented with Python3 + Qt5 + HTML5.
 
-[here are some snapshots](https://github.com/echoma/zkui/wiki/Snapshots)
+Here are some [ snapshots](https://github.com/echoma/zkui/wiki/Snapshots)
 
 # Features
 * Browse the ZooKeeper node tree, edit the node's data.
@@ -10,15 +10,19 @@ zkui is a GUI client of [Apache ZooKeeper](http://zookeeper.apache.org/) impleme
 * Delete node and its children  recursively.
 * ACL supportted, sheme including world,digest,ip
 * Use a pre-configured default ACL when create new node
+* Cross-platform, this is the nature given by Python3 and Qt5
 
-# Requirement
+# Download
 
-### 1. Operating System
-* I mainly test and use zkui on my Ubuntu Linux 14.04 X64 PC, so there may be some unkown bugs on other OS.
-* On MS Windows, multi-bytes charactors are messy. I am new to Python3 and need help to solve this.
-* As I tried months ago, On MS Windows, the official Kazoo release is buggy, you have to use my modified version. I will upload this on github soon.
+You can [download pre-built binary executables here](https://github.com/echoma/zkui/wiki/Download).
 
-### 2. Python3.x
+> Currently, there are only MS Windows executables provided.
+
+> I am having problem to freeze zkui into binary executables with cx_Freeze on my Ubuntu 14.04. I will appreciate it that if someone could help me on this.**
+
+# Build By yourself
+
+### 1. Python3.x
 
 * The latest version is 3.4.2 as Ｉwrite this. This is also the recommended version. [download it here](http://python.org/)
 
@@ -35,12 +39,20 @@ zkui is a GUI client of [Apache ZooKeeper](http://zookeeper.apache.org/) impleme
     Kazoo is a pure Python3 implemented ZooKeeper client.
 
     Install this package with this command: **python3 -m pip install kazoo**
+    
+    On MS Windows, the current release (version2.0) is not usable, you may need to download the unreleased version from its [repo](https://github.com/python-zk/kazoo), and overwrite the old files (some directory like C:\Python34\Lib\site-packages\kazoo)
 
-# Run zkui
-Start zkui with this command:  **python3 ./zkui.py**
+### 2. Run zkui
 
-The UI is composed with three parts:
+* Start zkui with this command:  **python3 ./zkui.py**
+
+# Simple Usage Guidance
+The whole UI is composed with three parts:
 
 * The top part is "navigation". It shows which node you are browsing. The "Go Up" and "Go Down" button is very helpful.
 * The left part is "children and operations".  The blue blocks is the children of current node, click it to browse the child. The orange button has many useful operations, discover them by yourself.
 * The right part is "node data". You can view and edit the node data here.
+
+# Miscellaneous
+* I mainly test and use zkui on my Ubuntu Linux 14.04 X64 PC, so there may be some unkown bugs on other OS.
+* I choose Apache License v2, but i am not an expert on license. Zkui uses many other opensource modules, I am not sure wether Apache Licese v2 is legal.

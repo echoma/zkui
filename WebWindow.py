@@ -1,9 +1,10 @@
-from PyQt5 import QtCore, QtGui, QtWidgets, QtWebKitWidgets
+from PyQt5 import QtCore, QtWidgets, QtWebKitWidgets, QtNetwork, QtWebKit, QtPrintSupport
 from PyQt5.QtCore import QVariant, pyqtSlot
 from PyQt5.QtGui import QPainter
-from os.path import abspath
+import os
+import os.path
 from kazoo.client import KazooClient
-from kazoo.exceptions import *
+from kazoo.exceptions import NoNodeError, ZookeeperError, NodeExistsError, BadVersionError, KazooException, NoChildrenForEphemeralsError, InvalidACLError, NotEmptyError
 import kazoo.security
 import time
 import logging
@@ -48,44 +49,53 @@ class WebWindow(object):
 	def retranslateUi(self, Window):
 		_translate = QtCore.QCoreApplication.translate
 		Window.setWindowTitle(_translate("Window", "Zookeeper GUI"))
-	def loadLocalFile(self, file):
-		self.webView.setUrl( QtCore.QUrl.fromLocalFile(abspath(sys.path[0]+'/'+file)) )
+	def loadLocalFile(self, filename):
+		localdir = os.path.abspath(sys.path[0])
+		if os.path.isfile(localdir):
+			localdir = os.path.dirname(localdir)
+		self.webView.setUrl( QtCore.QUrl.fromLocalFile(localdir+'/'+filename) )
 	def getCfgVar(self, name):
+		localdir = os.path.abspath(sys.path[0])
+		if os.path.isfile(localdir):
+			localdir = os.path.dirname(localdir)
 		cfg = {}
-		file = None
+		obj = None
 		try:
-			file = open(sys.path[0]+'/cfg.json','r')
-			cfg = json.loads(file.read())
+			obj = open(localdir+'/cfg.json','r')
+			cfg = json.loads(obj.read())
 		except Exception as e:
 			logging.info(str(e))
 		finally:
-			if file is not None:
-				file.close()
+			if obj is not None:
+				obj.close()
 		if name in cfg:
 			return str(cfg[name])
 		return ''
 	def setCfgVar(self, name, value):
+		localdir = os.path.abspath(sys.path[0])
+		if os.path.isfile(localdir):
+			localdir = os.path.dirname(localdir)
 		cfg = {}
-		file = None
+		obj = None
 		try:
-			file = open(sys.path[0]+'/cfg.json','r')
-			cfg = json.loads(file.read())
+			obj = open(localdir+'/cfg.json','r')
+			cfg = json.loads(obj.read())
 		except Exception as e:
 			pass
 		finally:
-			if file is not None:
-				file.close()
+			if obj is not None:
+				obj.close()
 		cfg[name] = value
-		file = None
+		obj = None
 		try:
-			file = open(sys.path[0]+'/cfg.json','w')
-			file.truncate()
-			file.write(json.dumps(cfg))
+			obj = open(localdir+'/cfg.json','w')
+			obj.truncate()
+			obj.write(json.dumps(cfg))
 		except Exception as e:
 			logging.info(str(e))
 		finally:
-			if file is not None:
-				file.close()
+			if obj is not None:
+				obj.close()
 	def makeDigestCred(self, user, plain_pass):
 		m = hashlib.sha1( bytes(user,'utf8') + b':' + bytes(plain_pass,'utf8') ).digest()
 		return user+':'+base64.b64encode(m).strip().decode('utf8')
@@ -94,10 +104,10 @@ class WebWindow(object):
 		frame.addToJavaScriptWindowObject('py',self)
 	@pyqtSlot(str,result=str)
 	def jsGetCfg(self, name):
-		return self.getCfgVar(name);
+		return self.getCfgVar(name)
 	@pyqtSlot(str,str)
 	def jsSetCfg(self, name, value):
-		self.setCfgVar(name, value);
+		self.setCfgVar(name, value)
 	def loadDefaultAcl(self):
 		self.updateDefaultAclCache( self.getCfgVar('defaultacl') )
 	def updateDefaultAclCache(self, list_str):
@@ -113,7 +123,7 @@ class WebWindow(object):
 				elif(one['scheme']=='digest'):
 					self.default_acl_plain.append(one)
 					if 'id' in one:
-						acl = kazoo.security.ACL( one['perm'], kazoo.security.Id('digest', self.makeDigestCred(one['id'])) )
+						acl = kazoo.security.ACL( one['perm'], kazoo.security.Id('digest', one['id']) )
 					else:
 						acl = kazoo.security.ACL( one['perm'], kazoo.security.Id('digest', self.makeDigestCred(one['user'],one['pass'])) )
 					self.default_acl.append(acl)
@@ -172,7 +182,7 @@ class WebWindow(object):
 			return QVariant({"err":"node not exists"})
 		except ZookeeperError as e:
 			logging.info("jsZkGetChildren, ZookeeperError")
-			t,v,tb = sys.exc_info()
+			t = sys.exc_info()[0]
 			return QVariant({"err":str(t)+str(e)})
 		return QVariant({"err":"", "children":children})
 	@pyqtSlot(str, result=QVariant)
@@ -185,7 +195,7 @@ class WebWindow(object):
 			return QVariant({"err":"node not exists"})
 		except ZookeeperError as e:
 			logging.info("jsZkGet, ZookeeperError")
-			t,v,tb = sys.exc_info()
+			t = sys.exc_info()[0]
 			return QVariant({"err":str(t)+str(e)})
 		ctime = time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(ret[1].ctime/1000))
 		mtime = time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(ret[1].mtime/1000))
@@ -204,7 +214,7 @@ class WebWindow(object):
 			return "bad version"
 		except ZookeeperError as e:
 			logging.info("jsZkSet, ZookeeperError")
-			t,v,tb = sys.exc_info()
+			t = sys.exc_info()[0]
 			return str(t)+str(e)
 		return ''
 	@pyqtSlot(str, result=QVariant)
@@ -217,7 +227,7 @@ class WebWindow(object):
 			return QVariant({"err":"node not exists"})
 		except ZookeeperError as e:
 			logging.info("jsZkGetAcl, ZookeeperError")
-			t,v,tb = sys.exc_info()
+			t = sys.exc_info()[0]
 			return QVariant({"err":str(t)+str(e)})
 		lst = []
 		for acl in ret[0]:
@@ -281,7 +291,7 @@ class WebWindow(object):
 			return "ephemeral node can not have child"
 		except ZookeeperError as e:
 			logging.info("jsZkCreate, ZookeeperError")
-			t,v,tb = sys.exc_info()
+			t = sys.exc_info()[0]
 			return str(t)+str(e)
 		return ''
 	@pyqtSlot(str, int, int, result=str)
@@ -300,7 +310,7 @@ class WebWindow(object):
 			return "node not empty"
 		except ZookeeperError as e:
 			logging.info("jsZkDelete, ZookeeperError")
-			t,v,tb = sys.exc_info()
+			t = sys.exc_info()[0]
 			return str(t)+str(e)
 		return ''
 	@pyqtSlot(str, str, int, int, result=str)
@@ -313,20 +323,20 @@ class WebWindow(object):
 				if self.zk.exists(dest_path) is None:
 					self.zk.create(dest_path, ori_data[0], acl=self.default_acl)
 				else:
-					self.set(dest_path, ori_data[0])
+					self.zk.set(dest_path, ori_data[0])
 			except NoNodeError as e:
 				logging.info("jsZkCopy, node, NoNodeError, ori_path="+ori_path+', dest_path='+dest_path)
 				return "node not exists"
 			except ZookeeperError as e:
 				logging.info("jsZkCopy, node, ZookeeperError")
-				t,v,tb = sys.exc_info()
+				t = sys.exc_info()[0]
 				return str(t)+str(e)
 			except Exception as e:
 				return 'exception, '+str(e)
 		#copy children
 		path = ''
 		try:
-			max_depth -= 1;
+			max_depth -= 1
 			path = ori_path
 			ori_children = self.zk.get_children(ori_path)
 			for child in ori_children:
@@ -341,7 +351,7 @@ class WebWindow(object):
 			return "node not exists, path="+path
 		except ZookeeperError as e:
 			logging.info("jsZkCopy, child, ZookeeperError")
-			t,v,tb = sys.exc_info()
+			t = sys.exc_info()[0]
 			return str(t)+str(e)+', path='+path
 		except Exception as e:
 			return 'exception, '+str(e)
@@ -381,7 +391,7 @@ class WebWindow(object):
 	def jsZkDeleteChildren(self, main_path, max_depth):
 		path = ''
 		try:
-			max_depth -= 1;
+			max_depth -= 1
 			path = main_path
 			logging.info("jsZkDeleteChildren, path="+main_path)
 			children = self.zk.get_children(path)
@@ -397,7 +407,7 @@ class WebWindow(object):
 			return "node not exists, path="+path
 		except ZookeeperError as e:
 			logging.info("jsZkDeleteChildren, ZookeeperError")
-			t,v,tb = sys.exc_info()
+			t = sys.exc_info()[0]
 			return str(t)+str(e)+', path='+path
 		except Exception as e:
 			return 'exception, '+str(e)
@@ -406,7 +416,7 @@ class WebWindow(object):
 	def jsZkExport(self, local_dir, main_path, max_depth):
 		path = ''
 		try:
-			max_depth -= 1;
+			max_depth -= 1
 			path = main_path
 			logging.info("jsZkExport, path="+main_path+' to local dir '+local_dir)
 			data = self.zk.get(main_path)
@@ -414,7 +424,7 @@ class WebWindow(object):
 			if not p.exists():
 				p.mkdir(parents=True)
 			elif not p.is_dir():
-				return 'local '+local_dir+' exists, but not a directory';
+				return 'local '+local_dir+' exists, but not a directory'
 			for child in p.iterdir():
 				return 'local path '+local_dir+' is not empty, clear it first'
 			p = pathlib.Path(local_dir+'/____data')
@@ -438,7 +448,7 @@ class WebWindow(object):
 			return "node not exists, path="+path
 		except ZookeeperError as e:
 			logging.info("jsZkExport, ZookeeperError")
-			t,v,tb = sys.exc_info()
+			t = sys.exc_info()[0]
 			return str(t)+str(e)+', path='+path
 		except Exception as e:
 			return 'exception, '+str(e)
@@ -447,7 +457,7 @@ class WebWindow(object):
 	def jsZkImport(self, local_dir, main_path, max_depth):
 		path = ''
 		try:
-			max_depth -= 1;
+			max_depth -= 1
 			path = main_path
 			logging.info("jsZkImport, path="+main_path+' from local dir '+local_dir)
 			obj = open(local_dir+'/____data', 'rb')
@@ -469,8 +479,8 @@ class WebWindow(object):
 			return "node not exists, path="+path
 		except ZookeeperError as e:
 			logging.info("jsZkImport, ZookeeperError")
-			t,v,tb = sys.exc_info()
+			t = sys.exc_info()[0]
 			return str(t)+str(e)+', path='+path
-		#except Exception as e:
-		#	return 'exception, '+str(e)
+		except Exception as e:
+			return 'exception, '+str(e)
 		return ''
