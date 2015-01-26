@@ -19,7 +19,7 @@ class WebPage(QtWebKitWidgets.QWebPage):
 	def __init__(self, parent=None):
 		super(WebPage, self).__init__(parent)
 		self.logger = logging
-		logging.basicConfig(level=logging.INFO)
+		logging.basicConfig(level=logging.ERROR)
 	def javaScriptConsoleMessage(self, msg, lineNumber, sourceID):
 		self.logger.info(msg+"("+sourceID+":"+str(lineNumber)+")")
 
@@ -162,7 +162,6 @@ class WebWindow(object):
 			auth_list = json.loads(auth_list_str)
 			for one in auth_list:
 				cred = self.makeDigestCred(one['user'], one['pass'])
-				print('cred='+cred)
 				self.zk.add_auth('digest', one['user']+':'+one['pass'])
 		except KazooException as e:
 			return "Zookeeper Error: "+str(e)
@@ -184,6 +183,8 @@ class WebWindow(object):
 			logging.info("jsZkGetChildren, ZookeeperError")
 			t = sys.exc_info()[0]
 			return QVariant({"err":str(t)+str(e)})
+		except Exception as e:	
+			return 'exception, '+str(e)
 		return QVariant({"err":"", "children":children})
 	@pyqtSlot(str, result=QVariant)
 	def jsZkGet(self, path):
@@ -197,6 +198,8 @@ class WebWindow(object):
 			logging.info("jsZkGet, ZookeeperError")
 			t = sys.exc_info()[0]
 			return QVariant({"err":str(t)+str(e)})
+		except Exception as e:	
+			return 'exception, '+str(e)
 		ctime = time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(ret[1].ctime/1000))
 		mtime = time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(ret[1].mtime/1000))
 		stat = {'ctime':ctime,'mtime':mtime,'version':ret[1].version}
@@ -216,6 +219,8 @@ class WebWindow(object):
 			logging.info("jsZkSet, ZookeeperError")
 			t = sys.exc_info()[0]
 			return str(t)+str(e)
+		except Exception as e:	
+			return 'exception, '+str(e)
 		return ''
 	@pyqtSlot(str, result=QVariant)
 	def jsZkGetAcl(self, path):
@@ -229,6 +234,8 @@ class WebWindow(object):
 			logging.info("jsZkGetAcl, ZookeeperError")
 			t = sys.exc_info()[0]
 			return QVariant({"err":str(t)+str(e)})
+		except Exception as e:
+			return 'exception, '+str(e)
 		lst = []
 		for acl in ret[0]:
 			dacl = {"perm":acl.perms,'scheme':acl.id.scheme,'id':acl.id.id}
@@ -272,6 +279,8 @@ class WebWindow(object):
 			logging.info("jsZkSetAcl, ZookeeperError")
 			t,v,tb = sys.exc_info()
 			return str(t)+str(e)
+		except Exception as e:
+			return 'exception, '+str(e)
 		return ''
 	@pyqtSlot(str,str,int,int,result=str)
 	def jsZkCreate(self, path, data, ephem, seq):
@@ -293,6 +302,8 @@ class WebWindow(object):
 			logging.info("jsZkCreate, ZookeeperError")
 			t = sys.exc_info()[0]
 			return str(t)+str(e)
+		except Exception as e:
+			return 'exception, '+str(e)
 		return ''
 	@pyqtSlot(str, int, int, result=str)
 	def jsZkDelete(self, path, ver, recursive):
@@ -312,6 +323,8 @@ class WebWindow(object):
 			logging.info("jsZkDelete, ZookeeperError")
 			t = sys.exc_info()[0]
 			return str(t)+str(e)
+		except Exception as e:
+			return 'exception, '+str(e)
 		return ''
 	@pyqtSlot(str, str, int, int, result=str)
 	def jsZkCopy(self, dest_path, ori_path, max_depth, children_only):
@@ -412,8 +425,8 @@ class WebWindow(object):
 		except Exception as e:
 			return 'exception, '+str(e)
 		return ''
-	@pyqtSlot(str, str, int, result=str)
-	def jsZkExport(self, local_dir, main_path, max_depth):
+	@pyqtSlot(str, str, int, int, result=str)
+	def jsZkExport(self, local_dir, main_path, max_depth, without_acl):
 		path = ''
 		try:
 			max_depth -= 1
@@ -434,13 +447,25 @@ class WebWindow(object):
 				obj.write(data[0])
 			finally:
 				obj.close()
+			if not without_acl:
+				ret = self.zk.get_acls(path)
+				lst = []
+				for acl in ret[0]:
+					lst.append( {"perm":acl.perms,'scheme':acl.id.scheme,'id':acl.id.id} )
+				p = pathlib.Path(local_dir+'/____acl')
+				p.touch()
+				obj = open(str(p),'w')
+				try:
+					obj.write(json.dumps(lst))
+				finally:
+					obj.close()
 			children = self.zk.get_children(path)
 			for child in children:
 				if child=='zookeeper':
 					continue
 				path = main_path+'/'+child
 				if max_depth>0:
-					ret = self.jsZkExport(local_dir+'/'+child, path, max_depth)
+					ret = self.jsZkExport(local_dir+'/'+child, path, max_depth, without_acl)
 					if len(ret)>0:
 						return ret
 		except NoNodeError as e:
@@ -453,8 +478,8 @@ class WebWindow(object):
 		except Exception as e:
 			return 'exception, '+str(e)
 		return ''
-	@pyqtSlot(str, str, int, result=str)
-	def jsZkImport(self, local_dir, main_path, max_depth):
+	@pyqtSlot(str, str, int, int, result=str)
+	def jsZkImport(self, local_dir, main_path, max_depth, without_acl):
 		path = ''
 		try:
 			max_depth -= 1
@@ -465,13 +490,24 @@ class WebWindow(object):
 				self.zk.create(path, obj.read(), acl=self.default_acl)
 			else:
 				self.zk.set(path, obj.read())
+			if not without_acl:
+				obj = open(local_dir+'/____acl', 'r')
+				acl_list = None
+				list_str = obj.read()
+				if list_str is not None and len(list_str)>0:
+					cache = json.loads(list_str)
+					acl_list = []
+					for one in cache:
+						acl = kazoo.security.ACL( one['perm'], kazoo.security.Id(one['scheme'], one['id']) )
+						acl_list.append(acl)
+					self.zk.set_acls(path, acl_list)
 			p = pathlib.Path(local_dir)
 			for child in p.iterdir():
 				if not child.is_dir():
 					continue
 				if child.name=='zookeeper':
 					continue
-				ret = self.jsZkImport(str(child), path+'/'+child.name, max_depth)
+				ret = self.jsZkImport(str(child), path+'/'+child.name, max_depth, without_acl)
 				if len(ret)>0:
 					return ret
 		except NoNodeError as e:

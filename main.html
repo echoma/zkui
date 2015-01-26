@@ -290,6 +290,9 @@ body{display:-webkit-flex;-webkit-flex-direction:column;}
 						<label for="export_dlg_max_depth" class="control-label">Max Depth: <span id="export_dlg_max_depth_val">100</span></label>
 						<input type="range" value="100" min="1" max="100" class="form-control" id="export_dlg_max_depth" onChange="$('#export_dlg_max_depth_val').text(parseInt($('#export_dlg_max_depth').val()))"/>
 					</div>
+					<div class="form-group">
+						<label><input type="checkbox" id="export_dlg_without_acl">Without ACL</label>
+					</div>
 				</form>
 			</div>
 			<div class="modal-footer">
@@ -322,6 +325,9 @@ body{display:-webkit-flex;-webkit-flex-direction:column;}
 					<div class="form-group">
 						<label for="import_dlg_max_depth" class="control-label">Max Depth: <span id="import_dlg_max_depth_val">100</span></label>
 						<input type="range" value="100" min="1" max="100" class="form-control" id="import_dlg_max_depth" onChange="$('#import_dlg_max_depth_val').text(parseInt($('#import_dlg_max_depth').val()))"/>
+					</div>
+					<div class="form-group">
+						<label><input type="checkbox" id="import_dlg_without_acl">Without ACL</label>
 					</div>
 				</form>
 			</div>

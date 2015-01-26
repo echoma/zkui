@@ -484,7 +484,8 @@ function ensureExportDialog()
 		myalert("max_depth should be at least 1");
 		return;
 	}
-	err = py.jsZkExport(local_path, path, max_depth)
+	var without_acl = $('#export_dlg_without_acl:checked').length>0?1:0;
+	err = py.jsZkExport(local_path, path, max_depth, without_acl)
 	if(!empty(err))
 		myalert("Export failed, err="+err);
 	else
@@ -532,7 +533,8 @@ function ensureImportDialog()
 		myalert("max_depth should be at least 1");
 		return;
 	}
-	err = py.jsZkImport(local_path, path, max_depth)
+	var without_acl = $('#import_dlg_without_acl:checked').length>0?1:0;
+	err = py.jsZkImport(local_path, path, max_depth, without_acl)
 	if(!empty(err))
 		myalert("Import failed, err="+err);
 	else
