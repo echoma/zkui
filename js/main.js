@@ -177,6 +177,8 @@ function zkuiValueUpdate(data)
 		$('#node_value').val(data);
 	else
 		$('#node_value').val(data.toString());
+	$('#node_value').css('-webkit-flex','2');
+	setTimeout(function(){ $('#node_value').css('-webkit-flex','1'); },1);
 }
 var perm_r = 1;
 var perm_w = 2;
