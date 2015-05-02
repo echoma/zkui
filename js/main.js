@@ -916,6 +916,18 @@ function dlgCheckData(format, dialog_id, data_id)
 		}catch(e) { dlgShowAlert(dlg, 'Failed!'); return; }
 		dlgShowInfo(dlg, 'Success!');
 	}
+	else if(format=='YAML')
+	{
+		try{
+			result = py.jsCheckYaml(data);
+			if(!empty(result))
+			{
+				dlgShowAlert(dlg, 'Failed!, error = '+result);
+				return;
+			}
+		}catch(e) { dlgShowAlert(dlg, 'Failed!'); return; }
+		dlgShowInfo(dlg, 'Success!');
+	}
 }
 function dlgShowInfo(dlg, text)
 {

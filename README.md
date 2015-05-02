@@ -1,7 +1,7 @@
 # zkui
 zkui is a GUI client of [Apache ZooKeeper](http://zookeeper.apache.org/) implemented with Python3 + Qt5 + HTML5.
 
-Here are some [ snapshots](https://github.com/echoma/zkui/wiki/Snapshots)
+Here are some [screenshots](https://github.com/echoma/zkui/wiki/Snapshots)
 
 # Features
 * Browse the ZooKeeper node tree, edit the node's data.

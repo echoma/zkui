@@ -14,6 +14,7 @@ import pathlib
 import hashlib
 import base64
 import traceback
+import yaml
 
 class WebPage(QtWebKitWidgets.QWebPage):
 	def __init__(self, parent=None):
@@ -106,6 +107,15 @@ class WebWindow(object):
 	def jsSetWinTitle(self, title):
 		_translate = QtCore.QCoreApplication.translate
 		self.setWindowTitle(_translate("Window", title))
+	@pyqtSlot(str, result=str)
+	def jsCheckYaml(self, s):
+		try:
+			a = yaml.load(s)
+		except Exception as e:
+			return str(e)
+		if a is None:
+			return 'Failed'
+		return ''
 	@pyqtSlot(str,result=str)
 	def jsGetCfg(self, name):
 		return self.getCfgVar(name)

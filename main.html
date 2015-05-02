@@ -124,7 +124,8 @@ body {display:-webkit-flex;-webkit-flex-direction:column; }
 			</div>
 			<div class="modal-footer">
 				<div class="btn-group col-xs-6" role="group" aria-label="...">
-					<button type="button" class="btn btn-success" title="Check whether the value is a valid JSON object string" onClick="dlgCheckData('JSON','create_child_dialog','create_child_dlg_data')">JSON check</button>
+					<button type="button" class="btn btn-success" title="Check whether the value is in valid JSON format" onClick="dlgCheckData('JSON','create_child_dialog','create_child_dlg_data')">JSON check</button>
+					<button type="button" class="btn btn-success" title="Check whether the value is in valid YAML format" onClick="dlgCheckData('YAML','create_child_dialog','create_child_dlg_data')">YAML check</button>
 					<button type="button" class="btn btn-primary" title="Edit new node default ACL" onClick="showDefaultAclDialog()">Default ACL</button>
 				</div>
 				<div class="col-xs-6">
@@ -162,6 +163,7 @@ body {display:-webkit-flex;-webkit-flex-direction:column; }
 				<div class="row">
 					<div class="btn-group col-xs-6" role="group" aria-label="...">
 						<button type="button" class="btn btn-success" title="Whether the data is in valid JSON format" onClick="dlgCheckData('JSON','edit_val_dialog','edit_val_dlg_data')">JSON check</button>
+						<button type="button" class="btn btn-success" title="Whether the data is in valid YAML format" onClick="dlgCheckData('YAML','edit_val_dialog','edit_val_dlg_data')">YAML check</button>
 					</div>
 					<div class="col-xs-6">
 						<button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
