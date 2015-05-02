@@ -102,6 +102,10 @@ class WebWindow(object):
 	def initJsComm(self):
 		frame = self.webView.page().mainFrame()
 		frame.addToJavaScriptWindowObject('py',self)
+	@pyqtSlot(str)
+	def jsSetWinTitle(self, title):
+		_translate = QtCore.QCoreApplication.translate
+		self.setWindowTitle(_translate("Window", title))
 	@pyqtSlot(str,result=str)
 	def jsGetCfg(self, name):
 		return self.getCfgVar(name)

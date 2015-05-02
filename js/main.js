@@ -1,3 +1,4 @@
+_ghost = '';
 _gpath = '/';
 _myalert_dom = null
 $(document).ready(
@@ -9,6 +10,7 @@ $(document).ready(
 		tmr.start();
 		_myalert_dom.tmr = new Timer(5.0, function(){_myalert_dom.fadeOut(200)})
 		
+		_ghost = py.jsGetCfg('zkhost');
 		if(zkuiEnsureConnection())
 			zkuiRefreshPath();
 
@@ -42,6 +44,7 @@ function zkuiEnsureConnection()
 		myalert("connect() failed: err="+obj)
 		return false;
 	}
+	_ghost = host;
 	zkuiRefreshPath();
 	return true;
 }
@@ -50,6 +53,7 @@ function zkuiRefreshPath(path)
 	if(!empty(path))
 		_gpath = path;
 	log("refreshing path = " + _gpath);
+	py.jsSetWinTitle(_ghost +' -- Zookeeper GUI');
 	//children
 	var obj = py.jsZkGetChildren(_gpath)
 	if(!empty(obj.err))

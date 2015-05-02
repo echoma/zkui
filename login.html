@@ -46,16 +46,28 @@ $(document).ready(
 			obj = py.jsZkGetChildren('/')
 			if(empty(obj.err))
 			{
-				window.location.href="main.html";
+				pyEnsureHistoryHost(host);
+				setTimeout(function(){window.location.href="main.html";},1000);
 			}
 			else
 			{
 				myalert("get_children() failed, err="+obj.err)
 			}
 		});
+		//last host
 		var ohost = py.jsGetCfg('zkhost');
 		if(!empty(ohost))
 			$("#host").val(ohost);
+		//history host list
+		var hlist = pyGetHistoryHost();
+		for(var i=0; i<hlist.length; ++i)
+		{
+			var p = $('#history_sample').parent();
+			var d = $('#history_sample').clone().removeAttr('id').show();
+			d.find('[name=text]').text(hlist[i]);
+			p.append(d);
+		}
+		//last auth list
 		var oauth_list = py.jsGetCfg('zkauthlist')
 		if(!empty(oauth_list))
 		{
@@ -98,6 +110,58 @@ function myalert(t)
 {
 	alert_dom.text(t).show(500);
 }
+function selectHistory(o)
+{
+	$('#host').val( $(o).text() );
+}
+function delHistory(o)
+{
+	var p = $(o).parents('[name=history]');
+	var h = p.find('[name=text]').text();
+	pyEraseHistoryHost(h);
+	p.remove();
+}
+function pyGetHistoryHost()
+{
+	var hlist = null;
+	try{
+		hlist = JSON.parse(py.jsGetCfg('zkhistoryhost'))
+		if(hlist.length>0)
+			return hlist;
+		return [];
+	}catch(e){log(e);}
+	return [];
+}
+function pySetHistoryHost(list)
+{
+	var s = JSON.stringify(list);
+	py.jsSetCfg('zkhistoryhost',s);
+}
+function pyEnsureHistoryHost(host)
+{
+	var hlist = pyGetHistoryHost();
+	for(var i=0; i<hlist.length; ++i)
+	{
+		if(hlist[i]==host)
+			return;
+	}
+	hlist.push(host);
+	pySetHistoryHost(hlist);
+}
+function pyEraseHistoryHost(host)
+{
+	log('erasing '+host);
+	var hlist = pyGetHistoryHost();
+	for(var i=0; i<hlist.length; ++i)
+	{
+		if(hlist[i]==host)
+		{
+			hlist.splice(i,1);
+			pySetHistoryHost(hlist);
+			return;
+		}
+	}
+}
 </script>
 </head>
 <body>
@@ -108,7 +172,21 @@ function myalert(t)
 			<form role="form">
 				<div class="form-group">
 					<label for="host">Host</label>
-					<input type="text" class="form-control" id="host" placeholder="e.g. 127.0.0.1:2181,192.168.0.15:2181"/>
+					<div class="input-group">
+						<div class="input-group-btn">
+							<button class="btn btn-primary dropdown-toggle form-control" data-toggle="dropdown"><span class="caret"></span></button>
+							<ul class="dropdown-menu">
+								<li style="display:none" id="history_sample" name="history">
+									<span style="margin:0.5em">
+									<span onClick="selectHistory(this)" name="text" style="cursor:pointer"></span>
+									&nbsp;&nbsp;
+									<span onClick="delHistory(this)" class="glyphicon glyphicon-remove" style="cursor:pointer" aria-hidden="true"></span>
+									</span>
+								</li>
+							</ul>
+						</div>
+						<input type="text" class="form-control" id="host" placeholder="e.g. 127.0.0.1:2181,192.168.0.15:2181"/>
+					</div>
 				</div>
 				<div class="form-group">
 					<label for="host">Digest Scheme List (keep empty if not use)</label>
