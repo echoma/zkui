@@ -1,5 +1,5 @@
 # zkui
-zkui is a GUI frontend of [Apache ZooKeeper](http://zookeeper.apache.org/) implemented with Python3 + Qt5 + HTML5.
+zkui is a cross platform GUI frontend of [Apache ZooKeeper](http://zookeeper.apache.org/) implemented with Python3 + Qt5 + HTML5.
 
 *A screenshot on Xubuntu 15.04*
 ![The Main Window](https://github.com/echoma/zkui/wiki/snapshot_20150122/02_create_child_0902.JPG)
@@ -24,7 +24,7 @@ If it's too complicated for you to build a Python3+PyQt5 environment, You can [d
 
 # Build By Yourself
 
-### 1. Install Python3.x
+#### 1. Install Python3.x
 
 * The latest version is 3.4.3 as Ｉwrite this. This is also the recommended version. [download it here](http://python.org/)
 
@@ -42,29 +42,29 @@ If it's too complicated for you to build a Python3+PyQt5 environment, You can [d
 
     Install this package with this command: **python3 -m pip install kazoo**
 
-### 2. Run zkui
+#### 2. Run zkui
 
 * Start zkui with this command:  **python3 ./zkui.py**
 
 # Freeze Python Scripts Into Binaries
 
-### Install Python3's cx_Freeze package.
+#### Install Python3's cx_Freeze package.
 
 * cx_Freeze is a set of cross platform tools which can freeze Python scripts into executables.
 
 * Install this package with this commad: **python3 -m pip install cx_Freeze**
 
-### On MS-Windows
+#### On MS-Windows
 
 * build executables: **python3 ./cx_freeze_setup.py build**
 
 * build MS Installer: **python3 ./cx_freeze_setup.py bdist_msi**
 
-### On Linux
+#### On Linux
 
 * build RPM *(not tested)*: **python3 ./cx_freeze_setup.py bdist_rpm**
 
-### On Mac OSX
+#### On Mac OSX
 
 * build DMG: **python3 ./cx_freeze_setup.py bdist_dmg**
 
