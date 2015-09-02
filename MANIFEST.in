@@ -1,0 +1,3 @@
+include LICENSE login.html main.html README.md zkui.py WebWindow.py apache-feather.ico
+recursive-include bootstrap *
+recursive-include js *
