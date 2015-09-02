@@ -2,7 +2,7 @@
 zkui is a GUI frontend of [Apache ZooKeeper](http://zookeeper.apache.org/) implemented with Python3 + Qt5 + HTML5.
 
 *A screenshot on Xubuntu 15.04*
-![The Main Window](https://github.com/echoma/zkui/wiki/snapshot_20150122/02_create_child_xubuntu.JPG)
+![The Main Window](https://github.com/echoma/zkui/wiki/snapshot_20150122/02_create_child_0902.JPG)
 
 [Check Here For More Screenshots](https://github.com/echoma/zkui/wiki/Snapshots)
 
