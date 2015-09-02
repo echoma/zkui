@@ -20,7 +20,7 @@ class WebPage(QtWebKitWidgets.QWebPage):
 	def __init__(self, parent=None):
 		super(WebPage, self).__init__(parent)
 		self.logger = logging
-		logging.basicConfig(level=logging.ERROR)
+		logging.basicConfig(format='%(levelname)s: %(message)s @ %(filename)s:%(lineno)s', level=logging.ERROR)
 	def javaScriptConsoleMessage(self, msg, lineNumber, sourceID):
 		self.logger.info(msg+"("+sourceID+":"+str(lineNumber)+")")
 
@@ -177,10 +177,11 @@ class WebWindow(object):
 			for one in auth_list:
 				cred = self.makeDigestCred(one['user'], one['pass'])
 				self.zk.add_auth('digest', one['user']+':'+one['pass'])
-		except KazooException as e:
-			return "Zookeeper Error: "+str(e)
 		except Exception as e:
-			return str(e)
+			logging.error("jsZkConnect, "+str(e))
+			t,v,tb = sys.exc_info()
+			strlist = traceback.format_tb(tb)
+			return str(e)+', traceback='+str(strlist)
 		return ''
 	#def onZkStateChange(self,state):
 	#	frame = self.webView.page().mainFrame()
@@ -191,14 +192,13 @@ class WebWindow(object):
 			logging.info("jsZkGetChildren, path="+path)
 			children = self.zk.get_children(path)
 		except NoNodeError:
-			logging.info("jsZkGetChildren, NoNodeError")
+			logging.error("jsZkGetChildren, NoNodeError")
 			return QVariant({"err":"node not exists"})
-		except ZookeeperError as e:
-			logging.info("jsZkGetChildren, ZookeeperError")
-			t = sys.exc_info()[0]
-			return QVariant({"err":str(t)+str(e)})
-		except Exception as e:	
-			return 'exception, '+str(e)
+		except Exception as e:
+			logging.error("jsZkGetChildren, "+str(e))
+			t,v,tb = sys.exc_info()
+			strlist = traceback.format_tb(tb)
+			return QVariant({"err":str(e)+', traceback='+str(strlist)})
 		return QVariant({"err":"", "children":children})
 	@pyqtSlot(str, result=QVariant)
 	def jsZkGet(self, path):
@@ -206,35 +206,38 @@ class WebWindow(object):
 			logging.info("jsZkGet, path="+path)
 			ret = self.zk.get(path)
 		except NoNodeError:
-			logging.info("jsZkGet, NoNodeError")
+			logging.error("jsZkGet, NoNodeError")
 			return QVariant({"err":"node not exists"})
-		except ZookeeperError as e:
-			logging.info("jsZkGet, ZookeeperError")
-			t = sys.exc_info()[0]
-			return QVariant({"err":str(t)+str(e)})
-		except Exception as e:	
-			return 'exception, '+str(e)
+		except Exception as e:
+			logging.error("jsZkGet, "+str(e))
+			t,v,tb = sys.exc_info()
+			strlist = traceback.format_tb(tb)
+			return QVariant({"err":str(e)+', traceback='+str(strlist)})
 		ctime = time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(ret[1].ctime/1000))
 		mtime = time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(ret[1].mtime/1000))
 		stat = {'ctime':ctime,'mtime':mtime,'version':ret[1].version}
-		return QVariant({"err":"", "data":ret[0].decode('utf8'), "stat":QVariant(stat)})
+		data = ''
+		if ret[0] is not None:
+			data = ret[0].decode('utf8')
+		else:
+			logging.info('jsZkGet data None, path='+path)
+		return QVariant({"err":"", "data":data, "stat":QVariant(stat)})
 	@pyqtSlot(str, str, int, result=str)
 	def jsZkSet(self, path, data, ver):
 		try:
 			logging.info("jsZkSet, path="+path+',ver='+str(ver))
 			self.zk.set(path, bytes(data, 'utf8'),ver)
 		except NoNodeError as e:
-			logging.info("jsZkSet, NoNodeError")
+			logging.error("jsZkSet, NoNodeError")
 			return "node not exists"
 		except BadVersionError as e:
-			logging.info("jsZkSet, BadVersionError")
+			logging.error("jsZkSet, BadVersionError")
 			return "bad version"
-		except ZookeeperError as e:
-			logging.info("jsZkSet, ZookeeperError")
-			t = sys.exc_info()[0]
-			return str(t)+str(e)
-		except Exception as e:	
-			return 'exception, '+str(e)
+		except Exception as e:
+			logging.error("jsZkSet, "+str(e))
+			t,v,tb = sys.exc_info()
+			strlist = traceback.format_tb(tb)
+			return str(e)+', traceback='+str(strlist)
 		return ''
 	@pyqtSlot(str, result=QVariant)
 	def jsZkGetAcl(self, path):
@@ -242,14 +245,13 @@ class WebWindow(object):
 			logging.info("jsZkGetAcl, path="+path)
 			ret = self.zk.get_acls(path)
 		except NoNodeError as e:
-			logging.info("jsZkGetAcl, NoNodeError")
+			logging.error("jsZkGetAcl, NoNodeError")
 			return QVariant({"err":"node not exists"})
-		except ZookeeperError as e:
-			logging.info("jsZkGetAcl, ZookeeperError")
-			t = sys.exc_info()[0]
-			return QVariant({"err":str(t)+str(e)})
 		except Exception as e:
-			return 'exception, '+str(e)
+			logging.error("jsZkGetAcl, "+str(e))
+			t,v,tb = sys.exc_info()
+			strlist = traceback.format_tb(tb)
+			return QVariant({"err":str(e)+', traceback='+str(strlist)})
 		lst = []
 		for acl in ret[0]:
 			dacl = {"perm":acl.perms,'scheme':acl.id.scheme,'id':acl.id.id}
@@ -278,46 +280,43 @@ class WebWindow(object):
 						acl_list.append(acl)
 			self.zk.set_acls(path, acl_list)
 		except NoNodeError as e:
-			logging.info("jsZkSetAcl, NoNodeError")
+			logging.error("jsZkSetAcl, NoNodeError")
 			return "node not exists"
 		except InvalidACLError as e:
-			logging.info("jsZkSetAcl, InvalidACLError")
+			logging.error("jsZkSetAcl, InvalidACLError")
 			t,v,tb = sys.exc_info()
-			print(str(e))
-			traceback.print_tb(tb)
-			return "invalid acl"
+			strlist = traceback.format_tb(tb)
+			return "invalid acl, traceback: "+str(strlist)
 		except BadVersionError as e:
-			logging.info("jsZkSetAcl, BadVersionError")
+			logging.error("jsZkSetAcl, BadVersionError")
 			return "bad version error"
-		except ZookeeperError as e:
-			logging.info("jsZkSetAcl, ZookeeperError")
-			t,v,tb = sys.exc_info()
-			return str(t)+str(e)
 		except Exception as e:
-			return 'exception, '+str(e)
+			logging.error("jsZkSetAcl, "+str(e))
+			t,v,tb = sys.exc_info()
+			strlist = traceback.format_tb(tb)
+			return str(e)+', traceback='+str(strlist)
 		return ''
 	@pyqtSlot(str,str,int,int,result=str)
 	def jsZkCreate(self, path, data, ephem, seq):
 		try:
 			logging.info("jsZkCreate, path="+path)
-			print(self.default_acl)
 			self.zk.create(path=path, value=bytes(data,'utf8'), ephemeral=bool(ephem), sequence=bool(seq))
-			self.zk.set_acls(path, self.default_acl)
+			if self.default_acl is not None and len(self.default_acl)>0:
+				self.zk.set_acls(path, self.default_acl)
 		except NoNodeError as e:
-			logging.info("jsZkCreate, NoNodeError")
+			logging.error("jsZkCreate, NoNodeError")
 			return "node not exists"
 		except NodeExistsError as e:
-			logging.info("jsZkCreate, NodeExistsError")
+			logging.error("jsZkCreate, NodeExistsError")
 			return "node already exists"
 		except NoChildrenForEphemeralsError as e:
-			logging.info("jsZkCreate, NoChildrenForEphemeralsError")
+			logging.error("jsZkCreate, NoChildrenForEphemeralsError")
 			return "ephemeral node can not have child"
-		except ZookeeperError as e:
-			logging.info("jsZkCreate, ZookeeperError")
-			t = sys.exc_info()[0]
-			return str(t)+str(e)
 		except Exception as e:
-			return 'exception, '+str(e)
+			logging.error("jsZkCreate, "+str(e))
+			t,v,tb = sys.exc_info()
+			strlist = traceback.format_tb(tb)
+			return str(e)+', traceback='+str(strlist)
 		return ''
 	@pyqtSlot(str, int, int, result=str)
 	def jsZkDelete(self, path, ver, recursive):
@@ -325,20 +324,19 @@ class WebWindow(object):
 			logging.info("jsZkDelete, path="+path+',ver='+str(ver)+', recursive='+str(recursive))
 			self.zk.delete(path, ver, bool(recursive))
 		except NoNodeError as e:
-			logging.info("jsZkDelete, NoNodeError")
+			logging.error("jsZkDelete, NoNodeError")
 			return "node not exists"
 		except BadVersionError as e:
-			logging.info("jsZkDelete, BadVersionError")
+			logging.error("jsZkDelete, BadVersionError")
 			return "bad version"
 		except NotEmptyError as e:
-			logging.info("jsZkDelete, NotEmptyError")
+			logging.error("jsZkDelete, NotEmptyError")
 			return "node not empty"
-		except ZookeeperError as e:
-			logging.info("jsZkDelete, ZookeeperError")
-			t = sys.exc_info()[0]
-			return str(t)+str(e)
 		except Exception as e:
-			return 'exception, '+str(e)
+			logging.error("jsZkDelete, "+str(e))
+			t,v,tb = sys.exc_info()
+			strlist = traceback.format_tb(tb)
+			return str(e)+', traceback='+str(strlist)
 		return ''
 	@pyqtSlot(str, str, int, int, result=str)
 	def jsZkCopy(self, dest_path, ori_path, max_depth, children_only):
@@ -352,14 +350,13 @@ class WebWindow(object):
 				else:
 					self.zk.set(dest_path, ori_data[0])
 			except NoNodeError as e:
-				logging.info("jsZkCopy, node, NoNodeError, ori_path="+ori_path+', dest_path='+dest_path)
+				logging.error("jsZkCopy, node, NoNodeError, ori_path="+ori_path+', dest_path='+dest_path)
 				return "node not exists"
-			except ZookeeperError as e:
-				logging.info("jsZkCopy, node, ZookeeperError")
-				t = sys.exc_info()[0]
-				return str(t)+str(e)
 			except Exception as e:
-				return 'exception, '+str(e)
+				logging.error("jsZkCopy, "+str(e))
+				t,v,tb = sys.exc_info()
+				strlist = traceback.format_tb(tb)
+				return str(e)+', traceback='+str(strlist)
 		#copy children
 		path = ''
 		try:
@@ -374,14 +371,13 @@ class WebWindow(object):
 				elif len(ret)>0:
 					return ret
 		except NoNodeError as e:
-			logging.info("jsZkCopy, child, NoNodeError")
+			logging.error("jsZkCopy, child, NoNodeError")
 			return "node not exists, path="+path
-		except ZookeeperError as e:
-			logging.info("jsZkCopy, child, ZookeeperError")
-			t = sys.exc_info()[0]
-			return str(t)+str(e)+', path='+path
 		except Exception as e:
-			return 'exception, '+str(e)
+			logging.error("jsZkCopy, "+str(e))
+			t,v,tb = sys.exc_info()
+			strlist = traceback.format_tb(tb)
+			return str(e)+', traceback='+str(strlist)
 		return ''
 	'''
 	@pyqtSlot(str, str, int, result=str)
@@ -430,14 +426,13 @@ class WebWindow(object):
 						return ret
 				self.zk.delete(path)
 		except NoNodeError as e:
-			logging.info("jsZkDeleteChildren, NoNodeError")
+			logging.error("jsZkDeleteChildren, NoNodeError")
 			return "node not exists, path="+path
-		except ZookeeperError as e:
-			logging.info("jsZkDeleteChildren, ZookeeperError")
-			t = sys.exc_info()[0]
-			return str(t)+str(e)+', path='+path
 		except Exception as e:
-			return 'exception, '+str(e)
+			logging.error("jsZkDeleteChildren, "+str(e))
+			t,v,tb = sys.exc_info()
+			strlist = traceback.format_tb(tb)
+			return str(e)+', traceback='+str(strlist)
 		return ''
 	@pyqtSlot(str, str, int, int, result=str)
 	def jsZkExport(self, local_dir, main_path, max_depth, without_acl):
@@ -458,14 +453,16 @@ class WebWindow(object):
 			p.touch()
 			obj = open(str(p),'wb')
 			try:
-				obj.write(data[0])
+				if data[0] is not None:
+					obj.write(data[0])
 			finally:
 				obj.close()
 			if not without_acl:
 				ret = self.zk.get_acls(path)
 				lst = []
-				for acl in ret[0]:
-					lst.append( {"perm":acl.perms,'scheme':acl.id.scheme,'id':acl.id.id} )
+				if ret is not None:
+					for acl in ret[0]:
+						lst.append( {"perm":acl.perms,'scheme':acl.id.scheme,'id':acl.id.id} )
 				p = pathlib.Path(local_dir+'/____acl')
 				p.touch()
 				obj = open(str(p),'w')
@@ -474,23 +471,23 @@ class WebWindow(object):
 				finally:
 					obj.close()
 			children = self.zk.get_children(path)
-			for child in children:
-				if child=='zookeeper':
-					continue
-				path = main_path+'/'+child
-				if max_depth>0:
-					ret = self.jsZkExport(local_dir+'/'+child, path, max_depth, without_acl)
-					if len(ret)>0:
-						return ret
+			if children is not None:
+				for child in children:
+					if child=='zookeeper':
+						continue
+					path = main_path+'/'+child
+					if max_depth>0:
+						ret = self.jsZkExport(local_dir+'/'+child, path, max_depth, without_acl)
+						if len(ret)>0:
+							return ret
 		except NoNodeError as e:
-			logging.info("jsZkExport, NoNodeError")
+			logging.error("jsZkExport, NoNodeError")
 			return "node not exists, path="+path
-		except ZookeeperError as e:
-			logging.info("jsZkExport, ZookeeperError")
-			t = sys.exc_info()[0]
-			return str(t)+str(e)+', path='+path
 		except Exception as e:
-			return 'exception, '+str(e)
+			logging.error("jsZkExport, "+str(e))
+			t,v,tb = sys.exc_info()
+			strlist = traceback.format_tb(tb)
+			return str(e)+', traceback='+str(strlist)
 		return ''
 	@pyqtSlot(str, str, int, int, result=str)
 	def jsZkImport(self, local_dir, main_path, max_depth, without_acl):
@@ -525,12 +522,11 @@ class WebWindow(object):
 				if len(ret)>0:
 					return ret
 		except NoNodeError as e:
-			logging.info("jsZkImport, NoNodeError")
+			logging.error("jsZkImport, NoNodeError")
 			return "node not exists, path="+path
-		except ZookeeperError as e:
-			logging.info("jsZkImport, ZookeeperError")
-			t = sys.exc_info()[0]
-			return str(t)+str(e)+', path='+path
 		except Exception as e:
-			return 'exception, '+str(e)
+			logging.error("jsZkImport, "+str(e))
+			t,v,tb = sys.exc_info()
+			strlist = traceback.format_tb(tb)
+			return str(e)+', traceback='+str(strlist)
 		return ''
