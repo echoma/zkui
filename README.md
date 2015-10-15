@@ -42,6 +42,10 @@ If it's too complicated for you to build a Python3+PyQt5 environment, You can [d
 
     Install this package with this command: **python3 -m pip install kazoo**
 
+* Install pyyaml package.
+
+    using this command: **python3 -m pip install pyyaml**
+
 #### 2. Run zkui
 
 * Start zkui with this command:  **python3 ./zkui.py**
