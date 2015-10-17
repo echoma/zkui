@@ -109,7 +109,7 @@ _gpath_max = '/';
 function zkuiNavBreadUpdate()
 {
 	var bread_path = _gpath;
-	if(0==_gpath_max.indexOf(_gpath))
+	if(0==_gpath_max.indexOf(_gpath) && _gpath_max.substring(_gpath.length).substring(0,1)=='/')
 		bread_path = _gpath_max;
 	else
 		_gpath_max = bread_path;
