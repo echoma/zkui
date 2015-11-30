@@ -20,7 +20,7 @@ zkui is a cross platform GUI frontend of [Apache ZooKeeper](http://zookeeper.apa
 If it's too complicated for you to build a Python3+PyQt5 environment, You can [download pre-built binary executables here](https://github.com/echoma/zkui/wiki/Download).
 
 * Currently, there are only MS Windows executables provided.
-* The latest binary package is uploaded on 2015-09-02
+* The latest binary package is uploaded on 2015-11-30
 
 # Build By Yourself
 
@@ -80,4 +80,12 @@ The whole UI is composed with three parts:
 * The right part is "node data". You can view and edit the node data here.
 
 # Miscellaneous
+
+#### license
+
 * I choose Apache License v2, but I am not an expert on license. Zkui uses many other opensource modules, I am not sure whether Apache Licese v2 is legal.
+
+#### todo
+
+* editor windows resizable instead of editor it self resizable
+* support dump node tree at an interval
