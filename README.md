@@ -87,5 +87,8 @@ The whole UI is composed with three parts:
 
 #### todo
 
-* editor windows resizable instead of editor it self resizable
+* switch to QT5.5/5.6 to use QtWebEngine for better html5 support
+* merge new upstream releases of h5 component
+* make editor window resizable instead of editor itself resizable
+* select export/import directory by dialog
 * support dump node tree at an interval
