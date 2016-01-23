@@ -1,0 +1,3 @@
+custom package:
+	common: -java -C+ -HTTP -Objc -ruby
+	other: +CMake +yaml

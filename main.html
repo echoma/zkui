@@ -12,6 +12,8 @@
 <script src="bootstrap/js/bootstrap.min.js" type="text/javascript"></script>
 <link rel="stylesheet" href="bootstrap/css/bootstrap.min.css">
 <link rel="stylesheet" href="bootstrap/css/bootstrap-theme.min.css">
+<link rel="stylesheet" href="js/highlight/styles/github.css">
+<script src="js/highlight/highlight.pack.js"></script>
 <style type="text/css">
 /*font-family:"Helvetica Neue","Helvetica","Arial","sans-serif"; */
 html,body,button {margin:0px; overflow:hidden; height:100%;}
@@ -91,7 +93,7 @@ body {display:-webkit-flex;-webkit-flex-direction:column; }
 				<button type="button" class="btn btn-info" title="Edit ACL" onClick="showEditAclDialog()"><span class="glyphicon glyphicon-road" aria-hidden="true"></span><b> Edit ACL</b></button>
 			</div>
 		</div>
-		<textarea class="form-control node_val_pnl" style="resize:none;-webkit-flex:1;" id="node_value" readonly="1"></textarea>
+		<pre class="form-control node_val_pnl" style="resize:none;-webkit-flex:1"><code id="node_value" style="resize:none"></code></pre>
 		<textarea style="display:none" id="node_acl_data"></textarea>
 	</div>
 </div>
@@ -118,8 +120,8 @@ body {display:-webkit-flex;-webkit-flex-direction:column; }
 					<label title="Close this dialog after create"><input type="checkbox" id="create_child_dlg_close" checked="1">Close after create</label>
 				</div>
 				<div class="form-group">
-					<label for="create_child_dlg_data" class="control-label">Data:</label>
-					<textarea class="form-control" rows="5" id="create_child_dlg_data" style="resize:vertical" placeholder="keep empty if this node has no data"></textarea>
+					<label for="create_child_dlg_data" class="control-label">DATA:</label>
+					<pre class="form-control" style="resize:vertical;height:15em"><code id="create_child_dlg_data" style="resize:none;height:100%"></code></pre>
 				</div>
 			</div>
 			<div class="modal-footer">
@@ -154,8 +156,8 @@ body {display:-webkit-flex;-webkit-flex-direction:column; }
 						<label title="Check version before edit the data"><input type="checkbox" id="edit_val_dlg_vcheck" checked="1">Version Check (current version is <span id="edit_val_dlg_version"></span>) </label>
 					</div>
 					<div class="form-group">
-						<label for="edit_val_dlg_data" class="control-label">Data:</label>
-						<textarea class="form-control" rows="5" id="edit_val_dlg_data" style="resize:vertical"></textarea>
+						<label for="edit_val_dlg_data" class="control-label">DATA:</label>
+						<pre class="form-control" style="resize:vertical;height:15em"><code id="edit_val_dlg_data" style="resize:none;height:100%"></code></pre>
 					</div>
 				</form>
 			</div>

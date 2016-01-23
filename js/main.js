@@ -177,10 +177,12 @@ function zkuiStatUpdate(stat)
 }
 function zkuiValueUpdate(data)
 {
+	var data_box = $('#node_value');
 	if(typeof(data)=='string')
-		$('#node_value').val(data);
+		data_box.text(data);
 	else
-		$('#node_value').val(data.toString());
+		data_box.text(data.toString());
+	hljs.highlightBlock(data_box.get(0));
 	$('#node_value').css('-webkit-flex','2');
 	setTimeout(function(){ $('#node_value').css('-webkit-flex','1'); },1);
 }
@@ -233,13 +235,17 @@ function showCreateChildDialog()
 	var dlg = $('#create_child_dialog');
 	dlg.modal({backdrop:false}).draggable({handle: ".modal-header"});
 	setTimeout("$('#create_child_dlg_name').focus().select();",100);
-	$('#create_child_dlg_data').val('');
+	var data_box = $('#create_child_dlg_data');
+	data_box.text('');
+	data_box.get(0).contentEditable="true";
+	hljs.highlightBlock(data_box.get(0));
+	_create_dlg_tmr.start();
 }
 function ensureCreateChild()
 {
 	var dlg = $('#create_child_dialog');
 	var name=$('#create_child_dlg_name').val();
-	var data=$('#create_child_dlg_data').val();
+	var data=$('#create_child_dlg_data').text();
 	var ephe=$('#create_child_dlg_ephemeral:checked').length>0?1:0;
 	var sque=$('#create_child_dlg_sequence:checked').length>0?1:0;
 	var goac=$('#create_child_dlg_go:checked').length>0?1:0;
@@ -378,7 +384,10 @@ function showEditValDialog()
 	dlg.modal({backdrop:false}).draggable({handle: ".modal-header"});
 	$('#edit_val_dlg_path').val($('#stat_path').val());
 	$('#edit_val_dlg_version').text($('#stat_version').val());
-	$('#edit_val_dlg_data').val($('#node_value').val());
+	var data_box = $('#edit_val_dlg_data');
+	data_box.text($('#node_value').text());
+	data_box.get(0).contentEditable="true";
+	hljs.highlightBlock(data_box.get(0));
 	setTimeout("$('#edit_val_dlg_data').focus().select();",100);
 }
 function ensureEditVal()
@@ -389,7 +398,7 @@ function ensureEditVal()
 	var vcheck=$('#edit_val_dlg_vcheck:checked').length>0?1:0;
 	if(!vcheck)
 		ver = -1;
-	var data=$('#edit_val_dlg_data').val();
+	var data=$('#edit_val_dlg_data').text();
 	err = py.jsZkSet(path, data, ver)
 	if(!empty(err))
 		myalert("Edit node data failed, err="+err);
@@ -908,7 +917,8 @@ function editAclUpdatePermCheck(line, perm)
 function dlgCheckData(format, dialog_id, data_id)
 {
 	var dlg = $('#'+dialog_id);
-	var data = $('#'+data_id).val();
+	var data = $('#'+data_id).text();
+	console.log(data);
 	if(format=='JSON')
 	{
 		try{
