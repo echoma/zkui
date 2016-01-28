@@ -31,6 +31,12 @@ function myokinfo(text)
 	_myalert_dom.fadeIn(200);
 	_myalert_dom.tmr.restart();
 }
+function setUiLayoutMainLR(l,r)
+{
+	$('.mainbottomlft').removeClass('flex1').removeClass('flex2').removeClass('flex3').removeClass('flex4').removeClass('flex5').addClass('flex'+l);
+	$('.mainbottomrgt').removeClass('flex1').removeClass('flex2').removeClass('flex3').removeClass('flex4').removeClass('flex5').addClass('flex'+r);
+	log('left='+l+', right='+r);
+}
 function zkuiEnsureConnection()
 {
 	if(py.jsZkIsConnected())
