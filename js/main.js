@@ -152,7 +152,7 @@ function zkuiNavBreadUpdate()
 		if(isact)
 			d.text(txt);
 		else
-			d.find('a').text(txt).attr('href','javascript:zkuiRefreshPath("'+encodeURIComponent(step)+'")');
+			d.find('a').attr('path',step).text(txt).attr('href','javascript:void(0)').click(function(){ zkuiRefreshPath($(this).attr('path')); });
 		dom.append(d);
 	}
 }
@@ -170,7 +170,7 @@ function zkuiChildrenUpdate(list)
 		else
 			path += '/'+list[i];
 		var d = spl.clone().removeClass('hidden').attr('name','real').attr('path', path)
-			.text(list[i]).attr('href','javascript:zkuiRefreshPath("'+encodeURIComponent(path)+'")');
+			.text(list[i]).attr('href','javascript:void(0)').click(function(){ zkuiRefreshPath($(this).attr('path')); });
 		dom.append(d);
 	}
 }
