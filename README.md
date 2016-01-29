@@ -92,3 +92,5 @@ The whole UI is composed with three parts:
 * make editor window resizable instead of editor itself resizable
 * select export/import directory by dialog
 * support dump node tree at an interval
+* node value editor syntax highlighting
+* diff utility when editor node value

@@ -9,7 +9,7 @@ $(document).ready(
 		var tmr = new Timer(5.0, zkuiEnsureConnection);
 		tmr.start();
 		_myalert_dom.tmr = new Timer(5.0, function(){_myalert_dom.fadeOut(200)})
-		
+
 		_ghost = py.jsGetCfg('zkhost');
 		if(zkuiEnsureConnection())
 			zkuiRefreshPath();
@@ -152,7 +152,7 @@ function zkuiNavBreadUpdate()
 		if(isact)
 			d.text(txt);
 		else
-			d.find('a').text(txt).attr('href','javascript:zkuiRefreshPath("'+step+'")');
+			d.find('a').text(txt).attr('href','javascript:zkuiRefreshPath("'+encodeURIComponent(step)+'")');
 		dom.append(d);
 	}
 }
@@ -170,7 +170,7 @@ function zkuiChildrenUpdate(list)
 		else
 			path += '/'+list[i];
 		var d = spl.clone().removeClass('hidden').attr('name','real').attr('path', path)
-			.text(list[i]).attr('href','javascript:zkuiRefreshPath("'+path+'")');
+			.text(list[i]).attr('href','javascript:zkuiRefreshPath("'+encodeURIComponent(path)+'")');
 		dom.append(d);
 	}
 }
