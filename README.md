@@ -20,7 +20,7 @@ zkui is a cross platform GUI frontend of [Apache ZooKeeper](http://zookeeper.apa
 If it's too complicated for you to build a Python3+PyQt5 environment, You can [download pre-built binary executables here](https://github.com/echoma/zkui/wiki/Download).
 
 * Currently, there are only MS Windows executables provided.
-* The latest binary package is uploaded on 2015-11-30
+* The latest binary package is uploaded on 2016-02-03
 
 # Build By Yourself
 
