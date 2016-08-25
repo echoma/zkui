@@ -89,7 +89,7 @@ function zkuiRefreshPath(path)
 }
 function zkuiGo(dir)
 {
-	if(dir<0)
+	if(dir==-1)
 	{
 		var p = _gpath.lastIndexOf('/');
 		var path = _gpath.substring(0,p);
@@ -97,7 +97,16 @@ function zkuiGo(dir)
 			path = '/';
 		zkuiRefreshPath(path);
 	}
-	else
+	else if(dir==2)
+	{
+		var p = $("#directPath").val()
+		if(!empty(p))
+		{
+			var path = p;
+			zkuiRefreshPath(path);
+		}
+	}
+	else if(dir==1)
 	{
 		var p = _gpath_max.indexOf('/',_gpath.length+1);
 		if(p>0)
@@ -159,7 +168,7 @@ function zkuiNavBreadUpdate()
 function zkuiChildrenUpdate(list)
 {
 	list.sort(function(a,b){if(a<b)return -1; else if(a>b) return 1; return 0;});
-	var dom=$('#chld_list');
+	var dom=$('#chld_list').children("ul");
 	dom.find('[name=real]').remove();
 	var spl = dom.find('[name=sample]');
 	for(var i=0; i<list.length; ++i)
@@ -169,8 +178,14 @@ function zkuiChildrenUpdate(list)
 			path += list[i];
 		else
 			path += '/'+list[i];
-		var d = spl.clone().removeClass('hidden').attr('name','real').attr('path', path)
-			.text(list[i]).attr('href','javascript:void(0)').click(function(){ zkuiRefreshPath($(this).attr('path')); });
+		var d = spl.clone()
+					.removeClass('hidden')
+					.attr('name','real');
+		var dChildren =d.children("a")
+					.attr('path', path)
+					.text(list[i])
+					.attr('href','javascript:void(0)')
+					.click(function(){ zkuiRefreshPath($(this).attr('path')); });
 		dom.append(d);
 	}
 }
