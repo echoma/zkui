@@ -28,10 +28,6 @@ If it's too complicated for you to build a Python3+PyQt5 environment, You can [d
 
 * The latest version is 3.4.3 as Ｉ write this. This is also the recommended version. [download it here](http://python.org/)
 
-> Qt5.6 removed QtWebkit. So, Qt5.5 is the newest version we can use to build zkui.
-
-> I was planning to port zkui to nw.js, but doesn't have enough spare time yest.
-
 * Install PyQt5 package.
 
     We use PyQt5 to draw the native window and use its QWebkit to render all the gui component inside the window.
@@ -39,6 +35,10 @@ If it's too complicated for you to build a Python3+PyQt5 environment, You can [d
     On Linux distribution, you can install it through software center, or download [source code](http://www.riverbankcomputing.com/software/pyqt/download5) and compile it by yourself.
 
     On MS Windows, you can install it via a [binary installer](http://www.riverbankcomputing.com/software/pyqt/download5)
+
+* IMPORTANT: Qt5.6 removed QtWebkit. So, Qt5.5 is the newest version we can use to build zkui.
+
+  I was planning to port zkui to nw.js, but doesn't have enough spare time yest.
 
 * Install Kazoo package.
 
