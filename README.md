@@ -26,7 +26,11 @@ If it's too complicated for you to build a Python3+PyQt5 environment, You can [d
 
 #### 1. Install Python3.x
 
-* The latest version is 3.4.3 as Ｉwrite this. This is also the recommended version. [download it here](http://python.org/)
+* The latest version is 3.4.3 as Ｉ write this. This is also the recommended version. [download it here](http://python.org/)
+
+> Qt5.6 removed QtWebkit. So, Qt5.5 is the newest version we can use to build zkui.
+
+> I was planning to port zkui to nw.js, but doesn't have enough spare time yest.
 
 * Install PyQt5 package.
 
